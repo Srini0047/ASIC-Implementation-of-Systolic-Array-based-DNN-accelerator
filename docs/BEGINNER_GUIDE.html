@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accelerator Beginner Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout concept: a manual, not a landing page. Sticky contents rail on the left, one reading column on the right;
+   every action is a numbered card with the exact text to type, and every mechanism has one labelled figure. */
+:root {
+  --bg: #f2f5f7;
+  --panel: #ffffff;
+  --ink: #14202a;
+  --muted: #55636f;
+  --line: #d3dbe1;
+  --accent: #0a5f8a;
+  --accent-soft: #e0eff7;
+  --do: #0b6a4c;
+  --do-soft: #dff2e9;
+  --warn: #86560a;
+  --warn-soft: #faefd2;
+  --skip: #55636f;
+  --skip-soft: #e8ecef;
+  --code-bg: #101c26;
+  --code-fg: #d9e7f0;
+  --code-dim: #8fa6b6;
+  --font-display: "Schibsted Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d151c; --panel: #141f28; --ink: #e3ecf2; --muted: #9db0bd; --line: #2a3a47;
+    --accent: #62b8e2; --accent-soft: #12303f; --do: #62d3a3; --do-soft: #113329;
+    --warn: #ebb64f; --warn-soft: #3a2d10; --skip: #9db0bd; --skip-soft: #1d2a34;
+    --code-bg: #08111a; --code-fg: #d3e3ee; --code-dim: #7f97a8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d151c; --panel: #141f28; --ink: #e3ecf2; --muted: #9db0bd; --line: #2a3a47;
+  --accent: #62b8e2; --accent-soft: #12303f; --do: #62d3a3; --do-soft: #113329;
+  --warn: #ebb64f; --warn-soft: #3a2d10; --skip: #9db0bd; --skip-soft: #1d2a34;
+  --code-bg: #08111a; --code-fg: #d3e3ee; --code-dim: #7f97a8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.shell { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 80px;
+         display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; }
+@media (max-width: 900px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+nav.toc { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; padding-top: 8px; font-size: 14px; max-height: 100vh; overflow-y: auto; }
+@media (max-width: 900px) { nav.toc { position: static; max-height: none; } }
+nav.toc .brand { font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.25; margin-bottom: 12px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+nav.toc a { display: block; padding: 5px 8px; border-radius: 4px; color: var(--muted); text-decoration: none; }
+nav.toc a:hover, nav.toc a:focus-visible { background: var(--accent-soft); color: var(--ink); outline: none; }
+main { min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; text-wrap: balance; }
+h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 12px; letter-spacing: -0.01em; }
+h2 { font-size: 28px; margin: 64px 0 12px; padding-top: 24px; border-top: 2px solid var(--ink); scroll-margin-top: 16px; }
+h3 { font-size: 20px; margin: 32px 0 8px; scroll-margin-top: 16px; }
+h4 { font-size: 15px; margin: 20px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+p { margin: 0 0 14px; max-width: 70ch; }
+ul, ol { max-width: 74ch; padding-left: 22px; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); }
+code, kbd, .mono { font-family: var(--font-mono); font-size: 0.9em; }
+code { background: var(--skip-soft); padding: 1px 5px; border-radius: 3px; }
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); padding: 0 5px; border-radius: 3px; }
+.lede { font-size: 19px; color: var(--muted); max-width: 62ch; }
+.meta { font-size: 14px; color: var(--muted); }
+
+/* callouts */
+.note { border: 1px solid var(--line); background: var(--panel); padding: 12px 16px; margin: 18px 0; max-width: 78ch; border-radius: 4px; }
+.note > .tag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; padding: 1px 8px; border-radius: 3px; }
+.note.do   { border-color: var(--do); }   .note.do > .tag   { background: var(--do-soft); color: var(--do); }
+.note.warn { border-color: var(--warn); } .note.warn > .tag { background: var(--warn-soft); color: var(--warn); }
+.note.skip > .tag { background: var(--skip-soft); color: var(--skip); }
+.note.idea > .tag { background: var(--accent-soft); color: var(--accent); }
+.note p:last-child { margin-bottom: 0; }
+
+/* steps */
+ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 16px 0; max-width: 84ch; }
+ol.steps > li { counter-increment: s; position: relative; padding: 2px 0 2px 46px; margin-bottom: 18px; }
+ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--ink); color: var(--bg); font-family: var(--font-mono); font-weight: 500; font-size: 14px; display: grid; place-items: center; }
+ol.steps > li > p:first-child { font-weight: 500; }
+
+/* code blocks with a where-to-type label */
+.cmd { margin: 10px 0 16px; max-width: 84ch; border-radius: 4px; overflow: hidden; background: var(--code-bg); }
+.cmd .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 8px 4px 12px; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--code-dim); border-bottom: 1px solid rgba(255,255,255,0.08); }
+.cmd button { font: inherit; text-transform: none; letter-spacing: 0; color: var(--code-fg); background: transparent; border: 1px solid rgba(255,255,255,0.25); border-radius: 3px; padding: 1px 8px; cursor: pointer; }
+.cmd button:hover, .cmd button:focus-visible { background: rgba(255,255,255,0.12); outline: none; }
+.cmd pre { margin: 0; padding: 10px 14px; overflow-x: auto; color: var(--code-fg); font-family: var(--font-mono); font-size: 14px; line-height: 1.55; }
+pre.out { background: var(--code-bg); color: var(--code-fg); padding: 10px 14px; border-radius: 4px; overflow-x: auto; font-family: var(--font-mono); font-size: 13.5px; line-height: 1.5; max-width: 84ch; margin: 8px 0 16px; }
+.cmd pre .c, pre.out .c { color: var(--code-dim); }
+.cmd pre .ok, pre.out .ok { color: #7fe0b0; }
+
+/* tables and figures */
+.tablewrap { overflow-x: auto; margin: 14px 0 20px; max-width: 100%; }
+table { border-collapse: collapse; font-size: 15px; min-width: 520px; width: 100%; background: var(--panel); }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border: 1px solid var(--line); }
+th { background: var(--skip-soft); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+figure { margin: 24px 0; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; overflow-x: auto; }
+figure svg { display: block; width: 100%; min-width: 640px; height: auto; color: var(--ink); font-family: var(--font-body); }
+figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); max-width: 80ch; }
+svg text { fill: currentColor; font-size: 13px; }
+svg .t-sm { font-size: 11.5px; } svg .t-b { font-weight: 600; } svg .t-mono { font-family: var(--font-mono); font-size: 11.5px; }
+svg .t-mut { fill: var(--muted); }
+svg .box { fill: var(--panel); stroke: currentColor; stroke-width: 1.4; }
+svg .py { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
+svg .hw { fill: var(--do-soft); stroke: var(--do); stroke-width: 1.4; }
+svg .lane-py { fill: none; stroke: var(--accent); stroke-width: 1; stroke-dasharray: 5 4; }
+svg .lane-hw { fill: none; stroke: var(--do); stroke-width: 1; stroke-dasharray: 5 4; }
+svg .wire { fill: none; stroke: currentColor; stroke-width: 1.6; }
+svg .wire-d { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5 4; }
+svg .sig { fill: none; stroke: currentColor; stroke-width: 1.5; }
+svg .hot { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 1.4; }
+svg .ar { fill: currentColor; }
+
+/* file tree */
+ul.tree, ul.tree ul { list-style: none; padding-left: 20px; margin: 0; max-width: none; }
+ul.tree { padding-left: 0; font-family: var(--font-mono); font-size: 14px; }
+ul.tree li { margin: 0; padding: 3px 0; border-left: 1px solid var(--line); padding-left: 12px; }
+ul.tree .desc { font-family: var(--font-body); color: var(--muted); margin-left: 8px; }
+.pill { display: inline-block; font-family: var(--font-body); font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0 7px; border-radius: 9px; margin-left: 8px; }
+.pill.need { background: var(--do-soft); color: var(--do); }
+.pill.opt  { background: var(--accent-soft); color: var(--accent); }
+.pill.skip { background: var(--skip-soft); color: var(--skip); }
+.tree-box { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; margin: 16px 0; overflow-x: auto; }
+.tree-box ul.tree { min-width: 560px; }
+
+.jobs { display: grid; gap: 10px; margin: 16px 0; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.job { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; }
+.job b { font-family: var(--font-display); font-size: 17px; display: block; margin-bottom: 4px; }
+.job .time { font-size: 13px; color: var(--muted); }
+.job.need { border-color: var(--do); }
+summary { cursor: pointer; font-weight: 500; }
+details { margin: 10px 0; max-width: 84ch; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 14px; }
+details[open] > summary { margin-bottom: 8px; }
+nav.toc details { margin: 0; padding: 0; border: 0; background: none; max-width: none; }
+nav.toc summary { color: var(--muted); padding: 2px 8px 6px; font-weight: 500; }
+@media (prefers-reduced-motion: no-preference) { nav.toc a { transition: background 0.15s; } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="brand">Accelerator<br>Beginner Guide</div>
+  <details id="tocd" open><summary>Contents</summary>
+  <ol>
+    <li><a href="#s0">0. Start here: your job list</a></li>
+    <li><a href="#s1">1. The story in plain words</a></li>
+    <li><a href="#s2">2. Basics from zero</a></li>
+    <li><a href="#s3">3. What every folder is for</a></li>
+    <li><a href="#s4">4. Words you will meet</a></li>
+    <li><a href="#s5">5. Job 0: set up your files</a></li>
+    <li><a href="#s6">6. Job 1: run the simulation</a></li>
+    <li><a href="#s7">7. Job 2: look at the waveform</a></li>
+    <li><a href="#s8">8. Job 3: the Python side</a></li>
+    <li><a href="#s9">9. Job 4: synthesis in Genus</a></li>
+    <li><a href="#s10">10. Job 5: numbers for your report</a></li>
+    <li><a href="#s11">11. If something fails</a></li>
+    <li><a href="#s12">12. Every file, one line each</a></li>
+  </ol>
+  </details>
+</nav>
+
+<main>
+<h1>Accelerator Beginner Guide</h1>
+<p class="lede">What the project files are, why each one exists, and exactly what to type. Written for someone who can simulate Verilog in Xcelium but has never seen the Python, C or script parts.</p>
+<p class="meta">Everything in this guide was checked on the real files, with one limit: I do not have Xcelium, ModelSim, Genus or Innovus here. The simulation was tested on another 4-state simulator (Icarus) with identical results; the commands for your tools are written carefully but were not run on them. Section 11 says what to do if one fails.</p>
+
+<!-- =============================== 0 ================================= -->
+<h2 id="s0">0. Start here: your job list</h2>
+
+<p>The project is one chip design (Verilog) plus a small amount of helper material around it. You do <b>not</b> need to understand or run all of it. Your work is a setup step (Job 0) followed by five jobs, in this order. Job 1 needs only the simulator you already have.</p>
+
+<div class="jobs">
+  <div class="job need"><b>Job 1: run the simulation</b>Xcelium or ModelSim runs the chip on 360 handwritten-digit images and prints <code>PASSED</code>.<div class="time">about 20 minutes · section 6</div></div>
+  <div class="job need"><b>Job 2: look at the waveform</b>Open the signals, take 3–4 screenshots for your report.<div class="time">about 30 minutes · section 7</div></div>
+  <div class="job"><b>Job 3: the Python side</b>Rebuild the chip's input, print the accuracy report. Optional, but it is what makes this a neural-network project.<div class="time">about 30 minutes · section 8</div></div>
+  <div class="job need"><b>Job 4: synthesis</b>Genus turns the design into gates and reports area, speed and power.<div class="time">1–3 hours, depends on your lab setup · section 9</div></div>
+  <div class="job need"><b>Job 5: the report</b>Fill in the numbers table and write it up.<div class="time">section 10</div></div>
+</div>
+
+<div class="note do"><span class="tag">You do this</span>
+<p>If you only have one hour: do Job 1. It proves the design works and it needs no Python at all, because the input file the chip reads (<code>build/prog.hex</code>) is already inside the zip.</p></div>
+
+<div class="note skip"><span class="tag">You can ignore</span>
+<p><b>Verilator</b> (I used it, you do not need it), the <b>C driver</b> (explained in section 3, you never run it), <b>PyTorch training</b> (already done, result is shipped), and every file ending in <code>.sh</code> in the <code>scripts</code> folder (they call Verilator; your replacements are in the <code>cadence</code> folder).</p></div>
+
+<!-- =============================== 1 ================================= -->
+<h2 id="s1">1. The story in plain words</h2>
+
+<p>The chip recognises handwritten digits. You give it a tiny 8×8 grey picture (64 numbers), it does a fixed amount of arithmetic, and it answers with ten scores, one per digit 0–9. The biggest score is its guess.</p>
+
+<p><b>Analogy.</b> Think of the chip as a vending machine that has ten judges inside. Each judge looks at the 64 pixels and gives a score for "how much does this look like my digit". The judges' preferences are a big table of numbers called <b>weights</b>. Somebody has to teach the judges (training), write their preferences down in whole numbers the machine can handle (quantization), and press the machine's keypad once for every number (loading). The machine itself never does any of that: it only does the arithmetic.</p>
+
+<p>That "somebody" is the reason there is a Python folder, a C folder and a build folder. Figure 1 shows the whole chain. Blue boxes are Python on your PC. Green boxes are Verilog running inside the simulator.</p>
+
+<figure>
+<svg viewBox="0 0 960 336" role="img" aria-label="Pipeline: three Python steps produce prog.hex; the testbench reads prog.hex and drives the chip; the chip's answers go to readback.txt; report.py reads them">
+  <defs><marker id="ar1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="ar"/></marker></defs>
+  <rect class="lane-py" x="8" y="8" width="944" height="132" rx="6"/>
+  <text x="20" y="28" class="t-b">PYTHON, on your PC  (already run once for you: results are in the build folder)</text>
+  <rect class="lane-hw" x="8" y="178" width="944" height="150" rx="6"/>
+  <text x="20" y="198" class="t-b">VERILOG, inside Xcelium / ModelSim  (this is your simulation)</text>
+
+  <rect class="py" x="24" y="46" width="176" height="66" rx="4"/>
+  <text x="112" y="72" text-anchor="middle" class="t-b">Train the network</text><text x="112" y="92" text-anchor="middle" class="t-mono">train_mlp.py</text>
+  <rect class="py" x="270" y="46" width="176" height="66" rx="4"/>
+  <text x="358" y="72" text-anchor="middle" class="t-b">Quantize</text><text x="358" y="92" text-anchor="middle" class="t-mono">quantize.py</text>
+  <rect class="py" x="516" y="46" width="176" height="66" rx="4"/>
+  <text x="604" y="72" text-anchor="middle" class="t-b">Compile</text><text x="604" y="92" text-anchor="middle" class="t-mono">compile.py</text>
+  <rect class="box" x="762" y="46" width="176" height="66" rx="4"/>
+  <text x="850" y="72" text-anchor="middle" class="t-b">The keypad presses</text><text x="850" y="92" text-anchor="middle" class="t-mono">build/prog.hex</text>
+  <path class="wire" d="M200,79 H268" marker-end="url(#ar1)"/><text x="234" y="72" text-anchor="middle" class="t-sm t-mut">weights</text>
+  <path class="wire" d="M446,79 H514" marker-end="url(#ar1)"/><text x="480" y="72" text-anchor="middle" class="t-sm t-mut">integers</text>
+  <path class="wire" d="M692,79 H760" marker-end="url(#ar1)"/><text x="726" y="72" text-anchor="middle" class="t-sm t-mut">writes</text>
+
+  <path class="wire" d="M850,112 V159 H112 V214" marker-end="url(#ar1)"/>
+  <text x="480" y="152" text-anchor="middle" class="t-sm">the testbench reads prog.hex one line at a time</text>
+
+  <rect class="hw" x="24" y="216" width="176" height="66" rx="4"/>
+  <text x="112" y="242" text-anchor="middle" class="t-b">Testbench</text><text x="112" y="262" text-anchor="middle" class="t-mono">tb_dnn_player.v</text>
+  <rect class="hw" x="270" y="216" width="176" height="66" rx="4"/>
+  <text x="358" y="242" text-anchor="middle" class="t-b">The chip</text><text x="358" y="262" text-anchor="middle" class="t-mono">rtl/*.v</text>
+  <rect class="box" x="516" y="216" width="176" height="66" rx="4"/>
+  <text x="604" y="242" text-anchor="middle" class="t-b">The chip's answers</text><text x="604" y="262" text-anchor="middle" class="t-mono">rtl_readback.txt</text>
+  <rect class="py" x="762" y="216" width="176" height="66" rx="4"/>
+  <text x="850" y="242" text-anchor="middle" class="t-b">Accuracy report</text><text x="850" y="262" text-anchor="middle" class="t-mono">report.py</text>
+  <path class="wire" d="M200,249 H268" marker-end="url(#ar1)"/><text x="234" y="242" text-anchor="middle" class="t-sm t-mut">writes</text>
+  <path class="wire" d="M270,266 H202" marker-end="url(#ar1)"/><text x="236" y="280" text-anchor="middle" class="t-sm t-mut">reads</text>
+  <path class="wire" d="M446,249 H514" marker-end="url(#ar1)"/><text x="480" y="242" text-anchor="middle" class="t-sm t-mut">answers</text>
+  <path class="wire" d="M692,249 H760" marker-end="url(#ar1)"/><text x="726" y="242" text-anchor="middle" class="t-sm t-mut">read by</text>
+  <text x="480" y="316" text-anchor="middle" class="t-sm t-mut">Jobs 1 and 2 use only the green row. Job 3 is the blue boxes.</text>
+</svg>
+<figcaption>Figure 1. Python prepares a text file of keypad presses; the testbench plays the role of the CPU and presses them into the chip; the chip's answers are written to a file that report.py turns into an accuracy number.</figcaption>
+</figure>
+
+<p>The file <code>prog.hex</code> is the link between the two halves. It is plain text, 9 677 lines: 9 676 keypad presses, one per line, plus a final END marker. Here is the beginning of it, decoded:</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Line in prog.hex</th><th>Split into</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td class="mono">03000004d44a0100</td><td class="mono">03 · 00 · 0004 · d44a0100</td><td>Operation <b>03</b> = "read and check". Read register number 4 (the chip's ID) and complain unless it equals <code>d44a0100</code>. It proves the testbench is talking to the right chip.</td></tr>
+<tr><td class="mono">01001000fbfd0400</td><td class="mono">01 · 00 · 1000 · fbfd0400</td><td>Operation <b>01</b> = "write". Put the value <code>fbfd0400</code> at address <code>1000</code>, which is the start of the weight memory. That value packs four weights (0, 4, −3, −5) into 32 bits.</td></tr>
+</tbody></table></div>
+
+<p>The remaining lines load all 304 rows of weights, the biases, a description of each layer, then the pictures, then press START, wait, and read the answers back. The chip's own registers and memories are all reached the same way: an address and a number.</p>
+
+<!-- =============================== 2 ================================= -->
+<h2 id="s2">2. Basics from zero</h2>
+
+<h3>2.1 What "the neural network" is here</h3>
+<p>It is two layers of multiplication and addition. Nothing else. For one picture:</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Step</th><th>What happens</th><th>Shape of the numbers</th></tr></thead>
+<tbody>
+<tr><td>Input</td><td>the 8×8 picture, flattened into one row of 64 numbers</td><td class="mono">x : [1 × 64]</td></tr>
+<tr><td>Layer 1</td><td>16 "neurons". Each one multiplies all 64 pixels by its own 64 weights and adds them up, then adds a bias number. Negative results become 0 (this is called ReLU).</td><td class="mono">x [1×64] · W1 [64×16] + b1 [16] → h [1×16]</td></tr>
+<tr><td>Layer 2</td><td>10 neurons, one per digit, each looking at the 16 numbers from layer 1</td><td class="mono">h [1×16] · W2 [16×10] + b2 [10] → scores [1×10]</td></tr>
+<tr><td>Answer</td><td>the position of the biggest score</td><td class="mono">argmax → one digit</td></tr>
+</tbody></table></div>
+
+<p>A real example from this project (picture number 0, which is a handwritten <b>7</b>): neuron 5 of layer 1 multiplies 64 pixel values by 64 weights and adds them up to <code>29 657</code>, adds its bias <code>4 550</code> to get <code>34 207</code>, and rescales that to <code>45</code>. Layer 2 then gives the ten scores <code>[−8, −14, −24, −10, −3, −27, −34, 34, −4, 20]</code>. The biggest is 34 at position 7. The chip says "7". You can see every such number yourself with <code>python sw\trace_one.py 0 5</code> (section 8).</p>
+
+<p>The <b>weights</b> are the only thing that was "learned". Training (with a library called PyTorch) tried thousands of values until the guesses on known pictures were right. That already happened; the result is in <code>build/model.onnx</code>.</p>
+
+<h3>2.2 What "MAC" means, and why it is the whole game</h3>
+<p>A <b>MAC</b> is one multiply followed by one add: <code>total = total + weight × pixel</code>. Layer 1 needs 64 × 16 = 1 024 of them, layer 2 needs 16 × 10 = 160, so <b>1 184 MACs per picture</b>. A neural-network chip is a machine for doing MACs cheaply. Doing them is easy; the expensive part is fetching the weights and pixels from memory, so the design is built to fetch each number as few times as possible.</p>
+
+<h3>2.3 What "systolic array" means</h3>
+<p><b>Analogy.</b> A bucket brigade. Instead of every worker walking to the warehouse, each worker hands the item to the next person in the line. Here the "workers" are 16 small multiply-add circuits (<b>PEs</b>, processing elements) in a 4×4 grid. Each PE keeps one weight for a while, pixels flow across the grid from the left, and running totals flow down. Nobody talks to the big memory except at the edges.</p>
+
+<figure>
+<svg viewBox="0 0 740 330" role="img" aria-label="A 4 by 4 grid of processing elements; pixels enter from the left and move right, running totals move down and leave at the bottom">
+  <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="ar"/></marker></defs>
+  <!-- rows of PEs: x = 140 + 100*c, y = 30 + 62*r, size 70x44 -->
+  <g>
+    <rect class="hw" x="140" y="30" width="70" height="44" rx="3"/><rect class="hw" x="240" y="30" width="70" height="44" rx="3"/><rect class="hw" x="340" y="30" width="70" height="44" rx="3"/><rect class="hw" x="440" y="30" width="70" height="44" rx="3"/>
+    <rect class="hw" x="140" y="92" width="70" height="44" rx="3"/><rect class="hw" x="240" y="92" width="70" height="44" rx="3"/><rect class="hw" x="340" y="92" width="70" height="44" rx="3"/><rect class="hw" x="440" y="92" width="70" height="44" rx="3"/>
+    <rect class="hw" x="140" y="154" width="70" height="44" rx="3"/><rect class="hw" x="240" y="154" width="70" height="44" rx="3"/><rect class="hw" x="340" y="154" width="70" height="44" rx="3"/><rect class="hw" x="440" y="154" width="70" height="44" rx="3"/>
+    <rect class="hw" x="140" y="216" width="70" height="44" rx="3"/><rect class="hw" x="240" y="216" width="70" height="44" rx="3"/><rect class="hw" x="340" y="216" width="70" height="44" rx="3"/><rect class="hw" x="440" y="216" width="70" height="44" rx="3"/>
+  </g>
+  <g class="t-mono" text-anchor="middle">
+    <text x="175" y="57">w×a</text><text x="275" y="57">w×a</text><text x="375" y="57">w×a</text><text x="475" y="57">w×a</text>
+    <text x="175" y="119">w×a</text><text x="275" y="119">w×a</text><text x="375" y="119">w×a</text><text x="475" y="119">w×a</text>
+    <text x="175" y="181">w×a</text><text x="275" y="181">w×a</text><text x="375" y="181">w×a</text><text x="475" y="181">w×a</text>
+    <text x="175" y="243">w×a</text><text x="275" y="243">w×a</text><text x="375" y="243">w×a</text><text x="475" y="243">w×a</text>
+  </g>
+  <!-- pixels in and passing right -->
+  <g class="wire">
+    <path d="M60,52 H138" marker-end="url(#ar2)"/><path d="M210,52 H238" marker-end="url(#ar2)"/><path d="M310,52 H338" marker-end="url(#ar2)"/><path d="M410,52 H438" marker-end="url(#ar2)"/>
+    <path d="M60,114 H138" marker-end="url(#ar2)"/><path d="M210,114 H238" marker-end="url(#ar2)"/><path d="M310,114 H338" marker-end="url(#ar2)"/><path d="M410,114 H438" marker-end="url(#ar2)"/>
+    <path d="M60,176 H138" marker-end="url(#ar2)"/><path d="M210,176 H238" marker-end="url(#ar2)"/><path d="M310,176 H338" marker-end="url(#ar2)"/><path d="M410,176 H438" marker-end="url(#ar2)"/>
+    <path d="M60,238 H138" marker-end="url(#ar2)"/><path d="M210,238 H238" marker-end="url(#ar2)"/><path d="M310,238 H338" marker-end="url(#ar2)"/><path d="M410,238 H438" marker-end="url(#ar2)"/>
+  </g>
+  <!-- totals passing down -->
+  <g class="wire">
+    <path d="M175,74 V90" marker-end="url(#ar2)"/><path d="M275,74 V90" marker-end="url(#ar2)"/><path d="M375,74 V90" marker-end="url(#ar2)"/><path d="M475,74 V90" marker-end="url(#ar2)"/>
+    <path d="M175,136 V152" marker-end="url(#ar2)"/><path d="M275,136 V152" marker-end="url(#ar2)"/><path d="M375,136 V152" marker-end="url(#ar2)"/><path d="M475,136 V152" marker-end="url(#ar2)"/>
+    <path d="M175,198 V214" marker-end="url(#ar2)"/><path d="M275,198 V214" marker-end="url(#ar2)"/><path d="M375,198 V214" marker-end="url(#ar2)"/><path d="M475,198 V214" marker-end="url(#ar2)"/>
+    <path d="M175,260 V288" marker-end="url(#ar2)"/><path d="M275,260 V288" marker-end="url(#ar2)"/><path d="M375,260 V288" marker-end="url(#ar2)"/><path d="M475,260 V288" marker-end="url(#ar2)"/>
+  </g>
+  <g class="t-sm" text-anchor="middle">
+    <text x="30" y="56">pixel 0</text><text x="30" y="118">pixel 1</text><text x="30" y="180">pixel 2</text><text x="30" y="242">pixel 3</text>
+    <text x="175" y="308">sum 0</text><text x="275" y="308">sum 1</text><text x="375" y="308">sum 2</text><text x="475" y="308">sum 3</text>
+  </g>
+  <text x="548" y="120" class="t-sm t-mut">each box:</text><text x="548" y="138" class="t-sm t-mut">w = its own weight,</text><text x="548" y="156" class="t-sm t-mut">stored inside</text><text x="548" y="182" class="t-sm t-mut">a = pixel arriving</text><text x="548" y="200" class="t-sm t-mut">from the left</text>
+</svg>
+<figcaption>Figure 2. The 4×4 array in <code>rtl/pe.v</code> and <code>rtl/systolic_array.v</code>. Four pixels enter on the left, staggered by one clock per row; each box multiplies its stored weight by the pixel passing through and adds it to the total arriving from above. Four sums leave at the bottom, which is 4 neurons answered at once.</figcaption>
+</figure>
+
+<p>A 4×4 array only sees 4 pixels and 4 neurons at a time, but the network has 64 pixels and 16 neurons. So the controller (<code>rtl/dnn_ctrl.v</code>) cuts the work into tiles: layer 1 becomes 16 × 4 = 64 tile-runs ("passes"), layer 2 another 12. In each pass it loads 4×4 = 16 weights (4 clocks), streams the 8 pictures of a batch through (8 clocks), and waits for the pipeline to empty (about 11 clocks). Partial totals from different tiles are added in a small memory. Everything in this paragraph is done by RTL you already have; you only need to know why the waveform looks the way it does.</p>
+
+<h3>2.4 Why 8-bit integers ("INT8")</h3>
+<p>Trained weights are decimals such as 0.0168. Decimal (floating-point) maths costs roughly ten times or more energy than 8-bit integer maths, so before the chip sees them each number is converted: pick a scale (0.01685 for layer 1), divide, round to a whole number between −127 and 127. This step is <b>quantization</b> and lives in <code>sw/quantize.py</code>. The price is a tiny accuracy loss; here there is none: the decimal network scores 96.94 % on 360 unseen pictures, and so does the integer network, and so does the chip.</p>
+<p>The chip's integer sums are large (like 34 207), so the last stage shrinks them back to 8 bits with a "multiply by 44203, then shift right by 25 bits" step. That equals multiplying by 0.001317 without needing a decimal multiplier.</p>
+
+<h3>2.5 Why the chip cannot run by itself</h3>
+<p>The chip has memories that start empty and registers that start at zero. To use it, something must (1) write 304 rows of weights into the weight memory, (2) write the biases and a "work order" for each layer, (3) write the picture into the input memory, (4) write 1 to the START register, (5) wait until DONE, (6) read the answers back. In a real product a small CPU does this by running <b>driver</b> software. In your simulation the <b>testbench</b> does it by replaying <code>prog.hex</code>. Same steps, different actor. Section 3 shows this side by side (Figure 3).</p>
+
+<!-- =============================== 3 ================================= -->
+<h2 id="s3">3. What every folder is for</h2>
+
+<p>Open the unzipped folder <code>systolic_dnn_accel</code>. Inside are these folders. The coloured tag says what you need to do with each one.</p>
+
+<div class="tree-box">
+<ul class="tree">
+  <li>systolic_dnn_accel/
+    <ul>
+      <li>rtl/ <span class="pill need">your chip</span><span class="desc">The Verilog design: 17 files, of which 15 make up the DNN accelerator (the other two belong to the older matrix-multiply version). This is the actual accelerator.</span></li>
+      <li>tb/ <span class="pill need">use one file</span><span class="desc"><b>tb_dnn_player.v</b> is the testbench. The other three are for the older first version.</span></li>
+      <li>cadence/ <span class="pill need">your launch files</span><span class="desc">New. Ready-made commands for Xcelium, ModelSim, Genus, plus double-click Python helpers for Windows.</span></li>
+      <li>build/ <span class="pill need">inputs and outputs</span><span class="desc">Numbers going into the chip and answers coming out. Pre-filled, so you can simulate straight away.</span></li>
+      <li>sw/ <span class="pill opt">optional</span><span class="desc">"Software": Python programs that prepare the chip's input and check its output.</span></li>
+      <li>driver/ <span class="pill skip">read only</span><span class="desc">C code a real processor would run. You never run it.</span></li>
+      <li>scripts/ <span class="pill skip">ignore</span><span class="desc">My own test runners; they need Verilator, which you do not have.</span></li>
+      <li>docs/ <span class="pill opt">reading</span><span class="desc">The technical documents from before, plus this guide.</span></li>
+      <li>README.md, requirements.txt <span class="pill skip">ignore</span><span class="desc">Short notes for people with the full open-source toolchain.</span></li>
+    </ul>
+  </li>
+</ul>
+</div>
+
+<h3>3.1 <code>rtl/</code> and <code>tb/</code>: what you already understand</h3>
+<p><b>RTL</b> is the chip: registers and logic written in Verilog. The files you would use if you were building the chip are all in <code>rtl/</code>. The top-level module is <code>dnn_accel_top</code> (or <code>dnn_accel_axil_top</code>, the same chip with an AXI bus plug on the front). Files starting with <code>accel_ctrl</code> or <code>systolic_accel_top</code> belong to the first, simpler version and are not part of the DNN design.</p>
+<p>A <b>testbench</b> is Verilog that is not the chip; it exists only to poke the chip in simulation. <code>tb/tb_dnn_player.v</code> is a "player": it reads a program file (<code>prog.hex</code>), and for each line writes or reads one chip register, exactly as a CPU would. It counts mismatches and prints <code>PLAYER PASSED</code> or <code>PLAYER FAILED</code>.</p>
+
+<h3>3.2 <code>sw/</code>: why there is Python at all</h3>
+<p>The chip only understands integers and register writes. Someone has to turn "a trained neural network" into those. That someone is a short series of Python programs, each doing one job, all readable in a text editor:</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>What it does, in plain words</th><th>Needs</th><th>Run it?</th></tr></thead>
+<tbody>
+<tr><td class="mono">train_mlp.py</td><td>Teaches the network to recognise digits, using the 1 797 example pictures that ship inside a library called scikit-learn. Saves <code>build/model.onnx</code> (the learned numbers).</td><td>PyTorch, scikit-learn, onnx (a very large download)</td><td><span class="pill skip">already done</span></td></tr>
+<tr><td class="mono">quantize.py</td><td>Converts the learned decimals into whole numbers the chip can use, and finds the "multiply then shift" numbers. Prints float accuracy and integer accuracy.</td><td>numpy, onnx, onnxruntime</td><td><span class="pill opt">Job 3</span></td></tr>
+<tr><td class="mono">golden.py</td><td>The "answer key": does the same integer arithmetic as the chip, but in Python, so the chip's answers can be checked bit for bit.</td><td>numpy</td><td>used by others</td></tr>
+<tr><td class="mono">compiler_lib.py, compile.py</td><td>The "compiler": cuts the network into 4×4 tiles, decides which memory address each number goes to, and writes <code>build/prog.hex</code> (the keypad presses). Also writes <code>net_image.h</code> for the C driver.</td><td>numpy</td><td><span class="pill opt">Job 3</span></td></tr>
+<tr><td class="mono">dnn_cfg.py</td><td>One list of chip settings (array size 4, memory depths) that must match the Verilog parameters.</td><td>nothing</td><td>used by others</td></tr>
+<tr><td class="mono">report.py</td><td>Reads the chip's answers from <code>build/rtl_readback.txt</code>, computes accuracy from <i>the chip's</i> numbers, prints speed figures.</td><td>numpy</td><td><span class="pill opt">Job 3</span></td></tr>
+<tr><td class="mono">trace_one.py</td><td>Follows one picture through the network and prints every number. This is the best "what is happening" teaching tool.</td><td>numpy</td><td><span class="pill opt">Job 3</span></td></tr>
+<tr><td class="mono">example_tiny_net.py, show_tiny.py</td><td>A 4-number example small enough to check with a pencil, and a decoder for the chip's answer.</td><td>numpy (show_tiny.py needs nothing but Python)</td><td><span class="pill opt">Job 3</span></td></tr>
+<tr><td class="mono">gen_random_net.py</td><td>Makes random networks and deliberately illegal commands for stress tests.</td><td>numpy</td><td><span class="pill skip">ignore</span></td></tr>
+<tr><td class="mono">sweep_arch.py</td><td>Tries array sizes 4, 8 and 16 with Verilator to compare speed. Its table is already copied into <code>docs/02</code>.</td><td>Verilator</td><td><span class="pill skip">ignore</span></td></tr>
+</tbody></table></div>
+
+<h3>3.3 <code>build/</code>: what that folder is</h3>
+<p>"Build" folders hold <b>generated</b> files: things produced by running a program, as opposed to things a person wrote. If you delete something in <code>build/</code> you can produce it again; if you delete something in <code>rtl/</code> it is gone. I left the finished results in it so that your first simulation needs no Python.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>What it is</th><th>Made by</th></tr></thead>
+<tbody>
+<tr><td class="mono">model.onnx</td><td>The trained network (weights as decimals). ONNX is a standard file format for networks, like PDF is for documents.</td><td>train_mlp.py</td></tr>
+<tr><td class="mono">data.npz</td><td>The 360 test pictures and their true labels.</td><td>train_mlp.py</td></tr>
+<tr><td class="mono">qnet.npz</td><td>The same network after conversion to integers.</td><td>quantize.py</td></tr>
+<tr><td class="mono">prog.hex</td><td><b>The main chip input.</b> 9 676 keypad presses plus an END line (9 677 lines): load weights, run 45 batches of 8 pictures, read back answers.</td><td>compile.py</td></tr>
+<tr><td class="mono">prog_meta.json</td><td>A label for each "read" in prog.hex, so report.py knows which answer is which.</td><td>compile.py</td></tr>
+<tr><td class="mono">wave_prog.hex</td><td>The first 568 lines of prog.hex plus an END line: one batch only, so waveform files stay small.</td><td>cut from prog.hex</td></tr>
+<tr><td class="mono">tiny_prog.hex</td><td>Program for the 4-number pencil example.</td><td>example_tiny_net.py</td></tr>
+<tr><td class="mono">net_image.h</td><td>The network written as C arrays, for the C driver.</td><td>compile.py</td></tr>
+<tr><td class="mono">rtl_readback.txt</td><td><b>The main chip output</b>: every value the chip returned, one per line. Written by the simulator, read by report.py.</td><td>simulation</td></tr>
+<tr><td class="mono">c_trace.hex, c_prog.hex, py_trace_first.hex, c_rtl_readback.txt, axil_readback.txt, tiny_readback.txt</td><td>Leftovers from my own tests (driver check, AXI check). Ignore them.</td><td>my scripts</td></tr>
+</tbody></table></div>
+
+<h3>3.4 <code>driver/</code>: what a "driver" is, and why you never run it</h3>
+<p>A <b>driver</b> is the program on the processor that knows how to talk to a piece of hardware. Your keyboard, GPU and Wi-Fi card all have one. For this chip, the driver is about 250 lines of C: <code>dnn_load_network()</code> writes weights and layer descriptions, <code>dnn_write_input()</code> writes a picture, <code>dnn_run()</code> presses START and waits, <code>dnn_read_output()</code> reads the ten scores.</p>
+<p>It exists for two reasons. First, a chip without software is unusable, so a complete project shows how software would use it. Second, it is an independent check: I made the C driver produce its own list of register writes and compared it with the Python compiler's list. They match on all 568 accesses of the first batch, which means the register map documented in <code>docs/05</code> is really what the chip does, and not just what one program believes. That is the whole reason for it. The C code is not needed for your simulation, and you cannot run it on your PC in any useful way because there is no chip attached.</p>
+
+<figure>
+<svg viewBox="0 0 960 270" role="img" aria-label="Left: in a real product a CPU running the C driver writes registers over a bus into the chip. Right: in your simulation the testbench reading prog.hex writes the same registers into the chip">
+  <defs><marker id="ar3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="ar"/></marker></defs>
+  <rect class="lane-py" x="8" y="8" width="452" height="252" rx="6"/>
+  <text x="24" y="32" class="t-b">In a real product</text>
+  <rect class="box" x="30" y="70" width="170" height="70" rx="4"/>
+  <text x="115" y="98" text-anchor="middle" class="t-b">A CPU</text><text x="115" y="118" text-anchor="middle" class="t-mono">runs driver/*.c</text>
+  <rect class="hw" x="268" y="70" width="170" height="70" rx="4"/>
+  <text x="353" y="98" text-anchor="middle" class="t-b">The chip</text><text x="353" y="118" text-anchor="middle" class="t-mono">the same rtl/</text>
+  <path class="wire" d="M200,105 H266" marker-end="url(#ar3)"/>
+  <text x="233" y="48" text-anchor="middle" class="t-sm">register writes</text>
+  <text x="233" y="62" text-anchor="middle" class="t-sm">over a bus</text>
+  <text x="128" y="170" class="t-sm t-mut">weights and pictures</text>
+  <text x="128" y="186" class="t-sm t-mut">come from flash / camera</text>
+
+  <rect class="lane-hw" x="500" y="8" width="452" height="252" rx="6"/>
+  <text x="516" y="32" class="t-b">In your simulation</text>
+  <rect class="box" x="522" y="70" width="170" height="70" rx="4"/>
+  <text x="607" y="98" text-anchor="middle" class="t-b">The testbench</text><text x="607" y="118" text-anchor="middle" class="t-mono">reads build/prog.hex</text>
+  <rect class="hw" x="760" y="70" width="170" height="70" rx="4"/>
+  <text x="845" y="98" text-anchor="middle" class="t-b">The chip</text><text x="845" y="118" text-anchor="middle" class="t-mono">the same rtl/</text>
+  <path class="wire" d="M692,105 H758" marker-end="url(#ar3)"/>
+  <text x="725" y="48" text-anchor="middle" class="t-sm">register writes</text>
+  <text x="725" y="62" text-anchor="middle" class="t-sm">(same addresses)</text>
+  <text x="620" y="170" class="t-sm t-mut">weights and pictures</text>
+  <text x="620" y="186" class="t-sm t-mut">are already inside prog.hex</text>
+
+  <path class="wire-d" d="M115,140 V226 H607 V142" marker-end="url(#ar3)"/>
+  <text x="360" y="220" text-anchor="middle" class="t-sm">the testbench stands in for the CPU + driver</text>
+</svg>
+<figcaption>Figure 3. The chip is identical in both worlds. Only the actor changes. The Python compiler and the C driver are two independent ways of producing the same register writes, which is why the driver appears in this project at all.</figcaption>
+</figure>
+
+<h3>3.5 <code>scripts/</code>: what a script is</h3>
+<p>A <b>script</b> is a text file containing commands you would otherwise type one by one. A <code>.sh</code> file is a script for a Linux shell; a <code>.bat</code> file is the Windows equivalent. Running a script just means "type all the commands in that file for me". Nothing magic.</p>
+<p>The scripts in <code>scripts/</code> are mine. They build the chip with <b>Verilator</b> (a free simulator), run it, and compare results. You do not have Verilator, so you use the equivalents in <code>cadence/</code>, which call Xcelium or ModelSim instead:</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>My script (needs Verilator)</th><th>What it does</th><th>Your replacement</th></tr></thead>
+<tbody>
+<tr><td class="mono">scripts/run_all.sh</td><td>Runs the whole chain: Python steps, simulation, report, driver check, AXI check.</td><td>Job 1 + Job 3, done by hand in sections 6 and 8</td></tr>
+<tr><td class="mono">scripts/run_tiny.sh</td><td>The 4-number example.</td><td><code>cadence\run_modelsim.bat tiny</code> or <code>--prog build/tiny_prog.hex</code></td></tr>
+<tr><td class="mono">scripts/run_wave.sh</td><td>Simulation that also saves a waveform file.</td><td><code>run_xcelium.sh --wave</code> / <code>run_modelsim.bat gui</code></td></tr>
+<tr><td class="mono">scripts/check_driver.sh</td><td>Compares the C driver's writes with the Python compiler's.</td><td>none needed</td></tr>
+<tr><td class="mono">scripts/run_dnn_regress.sh, run_regress.sh, run_mutations.sh</td><td>Big test campaigns: 240 random networks, 19 deliberately broken copies of the design.</td><td>none needed; results are quoted in <code>docs/06</code></td></tr>
+<tr><td class="mono">scripts/check_rtl_quality.sh, check_psum_formula.sh</td><td>Lint and structure checks; a formula check.</td><td>none needed (Genus and Xcelium do their own checks)</td></tr>
+</tbody></table></div>
+
+<div class="note idea"><span class="tag">Why this matters</span>
+<p>If someone asks in your presentation "how do you know the design is correct", the honest answer is: the chip returns exactly the same numbers as an independent integer model, on 360 pictures and on 240 random networks, and 19 deliberately introduced bugs were all caught by those tests. These are the scripts that did it. You only need to reproduce the first part (Job 1).</p></div>
+
+<!-- =============================== 4 ================================= -->
+<h2 id="s4">4. Words you will meet</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Word</th><th>Plain meaning</th></tr></thead>
+<tbody>
+<tr><td>Terminal / command prompt / <code>cmd</code></td><td>A window where you type a command and press Enter. On Windows it is called Command Prompt (<code>cmd</code>); on Linux it is the terminal.</td></tr>
+<tr><td>Current folder ("working directory")</td><td>The folder the terminal is "standing in". Commands with a relative path like <code>build/prog.hex</code> look inside it. Almost every problem with these files comes from being in the wrong folder. You want to be in <code>systolic_dnn_accel</code>.</td></tr>
+<tr><td><code>cd</code></td><td>"Change directory": walk the terminal into another folder. <code>cd systolic_dnn_accel</code> steps into it.</td></tr>
+<tr><td>pip</td><td>Python's installer for add-on libraries. <code>pip install numpy</code> downloads numpy.</td></tr>
+<tr><td>numpy, onnx, onnxruntime</td><td>Python libraries: number arrays, the network file format, and a program that runs a network from that format.</td></tr>
+<tr><td>Hex file</td><td>A text file of numbers written in base 16 (0–9 then a–f). <code>fb</code> = 251 = a single byte.</td></tr>
+<tr><td>Register</td><td>A numbered mailbox inside the chip. Writing a number to it changes chip behaviour; reading it tells you something.</td></tr>
+<tr><td>Batch</td><td>Several pictures processed together (8 here) so that each weight loaded is used 8 times.</td></tr>
+<tr><td>INT8 / bias / ReLU</td><td>Whole numbers from −128 to 127 / a fixed number added to each neuron's sum / "turn negative into 0".</td></tr>
+<tr><td>Plusarg (<code>+prog=...</code>)</td><td>A setting typed after the simulator command, starting with <code>+</code>. It tells the testbench which program file to read.</td></tr>
+<tr><td>Waveform</td><td>A picture of signals against time, like a heart monitor for the chip.</td></tr>
+<tr><td>Synthesis, netlist</td><td>Turning Verilog into a list of real logic gates from a manufacturer's library. That list is the netlist.</td></tr>
+<tr><td>SDC</td><td>A short file telling the synthesis tool the speed you want (the clock) and what surrounds the chip.</td></tr>
+<tr><td>Slack</td><td>Spare time on the slowest path. Positive is good (fast enough); negative means the clock is too fast for the gates.</td></tr>
+</tbody></table></div>
+
+<!-- =============================== 5 ================================= -->
+<h2 id="s5">5. Job 0: set up your files</h2>
+
+<p>You have two possible setups. Find out which you have before continuing, because the commands differ.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>Setup A: everything on your Windows PC</th><th>Setup B: Cadence tools on a Linux server or lab machine</th></tr></thead>
+<tbody>
+<tr><td><b>How you know</b></td><td>You can start ModelSim from the Windows Start menu, and Python works in the same cmd window.</td><td>You log in remotely (a terminal, or a remote desktop) to a Linux machine to use Xcelium, Genus, Innovus.</td></tr>
+<tr><td><b>Simulator</b></td><td>ModelSim, using <code>cadence\run_modelsim.bat</code></td><td>Xcelium, using <code>bash cadence/run_xcelium.sh</code></td></tr>
+<tr><td><b>Python</b></td><td>same PC, cmd</td><td>either on your PC (recommended), or the server's Python 3 if it has numpy</td></tr>
+<tr><td><b>Genus / Innovus</b></td><td>not available here, go to the Linux machine for Job 4</td><td>the same Linux machine</td></tr>
+</tbody></table></div>
+
+<div class="note idea"><span class="tag">Setup B and Python: two kinds of file travel</span>
+<p>In Setup B the simulator runs on the server but your Python (Job 3) is on your PC, so the files they produce must be moved by hand (WinSCP, step 5 below, works both ways):</p>
+<ul>
+<li><b>Made by Python on the PC, needed by the simulator:</b> <code>build/prog.hex</code> and <code>build/tiny_prog.hex</code>. Only when you regenerate them; the shipped copies already work.</li>
+<li><b>Made by the simulator on the server, needed by Python:</b> <code>build/rtl_readback.txt</code> (for the report) and <code>build/custom_readback.txt</code> (for the pencil example). Copy them into the same <code>build</code> folder on the PC.</li>
+</ul>
+<p>The shortcut that avoids all copying: run the Python steps on the server as well, with <code>python3</code> instead of <code>python</code> and forward slashes (Job 3 shows both forms). That needs numpy on the server: test it with <code>python3 -c "import numpy"</code>; no output means it is there.</p></div>
+
+<p>Most university Cadence installs are Setup B. The instructions below cover both. If you are unsure, do steps 1 to 4 (they are needed in both), and ask your lab assistant how to open a terminal on the Cadence machine.</p>
+
+<ol class="steps">
+<li><p>Put the zip somewhere with a short path.</p>
+<p>In File Explorer, find <code>systolic_dnn_accel_v2.zip</code>. Right-click it, choose <b>Extract All…</b>, and in the box that asks where, replace the suggested path with <code>C:\projects</code> (click <b>Browse</b> and create the folder if it does not exist), then click <b>Extract</b>. Avoid folders with spaces in their names such as "My Documents". You now have <code>C:\projects\systolic_dnn_accel</code>.</p></li>
+
+<li><p>Open a command window standing in that folder.</p>
+<p>In File Explorer open <code>C:\projects\systolic_dnn_accel</code>. Click once in the <b>address bar</b> at the top (where the path is written), type <code>cmd</code>, press <kbd>Enter</kbd>. A black window opens whose first line ends with <code>systolic_dnn_accel&gt;</code>. That is the "current folder" from section 4.</p></li>
+
+<li><p>Check that you are in the right place.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd</span><button type="button" data-copy>Copy</button></div><pre>dir</pre></div>
+<p>The listing must include <code>rtl</code>, <code>tb</code>, <code>sw</code>, <code>build</code>, <code>cadence</code>. If it does not, you are one folder too high or too low: use <code>cd</code> to move.</p></li>
+
+<li><p>Check Python.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd</span><button type="button" data-copy>Copy</button></div><pre>python --version</pre></div>
+<p>You should see <code>Python 3.13.3</code>. If Windows says "python is not recognized", try <code>py --version</code>; if that works, use <code>py</code> instead of <code>python</code> everywhere in this guide, and write <code>py -m pip install ...</code> wherever the guide says <code>python -m pip install ...</code>.</p></li>
+
+<li><p><b>Setup B only:</b> copy the folder to the Linux machine and open a terminal there.</p>
+<p>Ask your lab how they move files (a shared network drive is common). If they have no preference, the free program <b>WinSCP</b> works: start it, in the login window choose <b>File protocol: SFTP</b>, type the server's <b>Host name</b>, your <b>User name</b> and password, click <b>Login</b>. The window shows your PC on the left and the server on the right. Drag the <code>systolic_dnn_accel_v2.zip</code> file from left to right. Then in the server's terminal:</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal</span><button type="button" data-copy>Copy</button></div><pre>unzip systolic_dnn_accel_v2.zip
+cd systolic_dnn_accel
+ls</pre></div>
+<p>If <code>unzip</code> is not installed, use <code>python3 -m zipfile -e systolic_dnn_accel_v2.zip .</code> instead. <code>ls</code> should list the same folders as above.</p></li>
+
+<li><p><b>Setup B only:</b> make the Cadence tools available.</p>
+<p>Cadence tools are usually not on the search path until you run a lab-specific setup line, something like <code>source /opt/cadence/setup.csh</code> or <code>module load xcelium</code>. Ask your lab assistant for "the line that loads Xcelium and Genus". Then check:</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal</span><button type="button" data-copy>Copy</button></div><pre>which xrun
+which genus</pre></div>
+<p>Each must print a path. If it prints "no xrun in …", the setup line has not been run in this terminal window. (Each new terminal window needs it again unless your lab put it in your login file.)</p></li>
+</ol>
+
+<!-- =============================== 6 ================================= -->
+<h2 id="s6">6. Job 1: run the simulation</h2>
+
+<p><b>Goal:</b> make the simulator run all 360 test pictures through your chip and print <code>PASSED</code>. <b>What happens inside:</b> the testbench reads <code>build/prog.hex</code> line by line, pushes each line into the chip as a register write or read, and compares every answer with the expected one that is already stored inside the file.</p>
+
+<div class="note do"><span class="tag">You do this</span><p>Make sure your terminal is standing in the <code>systolic_dnn_accel</code> folder (section 5, steps 2 and 3). Then follow Setup A or Setup B, not both.</p></div>
+
+<h3>Setup A: ModelSim on Windows</h3>
+<ol class="steps">
+<li><p>Type the launch command.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>cadence\run_modelsim.bat</pre></div>
+<p>Or, in File Explorer, open the <code>cadence</code> folder and double-click <code>run_modelsim.bat</code>. It does the same and keeps its window open at the end. If Windows shows a blue "protected your PC" box, click <b>More info</b>, then <b>Run anyway</b>.</p></li>
+<li><p>Wait. ModelSim first compiles the 16 Verilog files (the testbench plus the 15 design files; a few seconds), then simulates about 0.9 milliseconds of chip time. This takes from under a minute to a few minutes depending on the ModelSim edition.</p></li>
+<li><p>Find the result near the bottom of the window.</p></li>
+</ol>
+<p>If the <code>.bat</code> file does not work for any reason, this single command does the same thing (it needs <code>vsim</code> to be found too; if cmd says "vsim is not recognized", read the first row of the table in section 11):</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>vsim -c -do cadence/run_modelsim.do</pre></div>
+
+<h3>Setup B: Xcelium on Linux</h3>
+<ol class="steps">
+<li><p>Type the launch command.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>bash cadence/run_xcelium.sh</pre></div>
+<p>(Use <code>bash</code> even if your terminal uses another shell; the file is written for bash.) The script checks that <code>xrun</code> exists, then runs it with the right file list and settings. It creates a few temporary files (<code>xcelium.d</code>, <code>xrun.log</code>) that you can delete later.</p></li>
+<li><p>Wait a few minutes at most.</p></li>
+<li><p>The last line of the output tells you the result.</p></li>
+</ol>
+
+<h3>What a good result looks like</h3>
+<p>The simulator prints many of its own lines. Look for these two, which come from the testbench, and for the last line of the Xcelium script:</p>
+<pre class="out">PLAYER: 9677 ops, 1313 reads, 0 mismatches, 0 timeouts, 79785 cycles polling
+<span class="ok">*** PLAYER PASSED ***</span>
+<span class="c">(Xcelium script only, last line:)</span>
+<span class="ok">&gt;&gt;&gt; RESULT: PASSED  (readback written to build/rtl_readback.txt)</span></pre>
+
+<p>What each number means:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Item</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td class="num">9677 ops</td><td>The testbench executed all 9 677 lines of <code>prog.hex</code> (the last one is the END marker).</td></tr>
+<tr><td class="num">1313 reads</td><td>It read 1 313 values back from the chip. Of these, <b>1 088 were checked</b> against the expected answer stored in the file: 8 ID/configuration registers plus 1 080 answer words (45 batches × 8 pictures × 3 words per picture). The other 225 are speed counters that are only logged.</td></tr>
+<tr><td class="num">0 mismatches</td><td>Every one of the 1 088 checks matched. <b>This is the number that proves the chip is correct.</b></td></tr>
+<tr><td class="num">0 timeouts</td><td>The chip never got stuck waiting for itself.</td></tr>
+<tr><td class="num">79785 cycles polling</td><td>How long the testbench waited for the chip to finish, in clock cycles. It should be the same on your simulator; if it differs by a few cycles that is not a problem.</td></tr>
+</tbody></table></div>
+
+<div class="note skip"><span class="tag">Harmless warnings</span>
+<p>You will probably see a warning that <code>$readmemh</code> found fewer words than the memory it is filling (the memory has room for 262 144 lines and the file has 9 677). Some simulators also print a warning about missing timescales, or about unused parameters. If the two lines above appear, ignore the warnings.</p></div>
+
+<div class="note warn"><span class="tag">If you see FAILED</span>
+<p>Copy the first ten lines that contain <code>FAIL</code> or <code>MISMATCH</code>, plus the tool name and version, and send them to me. Section 11 lists the usual causes first.</p></div>
+
+<h3>Optional second run: through the AXI bus</h3>
+<p>The same test, but the testbench talks to the chip through an AXI4-Lite bus plug (the standard way a processor connects to a peripheral), with random delays. It should also pass.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd (Setup A)</span><button type="button" data-copy>Copy</button></div><pre>cadence\run_modelsim.bat axi</pre></div>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal (Setup B)</span><button type="button" data-copy>Copy</button></div><pre>bash cadence/run_xcelium.sh --axi</pre></div>
+<p>Its answers go to <code>build/axil_readback.txt</code>, so the normal <code>build/rtl_readback.txt</code> from the first run stays untouched.</p>
+
+<h3>The pencil example: see the chip do arithmetic you can check by hand</h3>
+<p>Before trusting 360 pictures, watch the chip do one tiny job. It takes two vectors of four numbers, multiplies them by a 4×4 weight table <code>W = [1..16]</code>, adds a bias, and applies ReLU:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Step</th><th>Picture 0</th><th>Picture 1</th></tr></thead>
+<tbody>
+<tr><td>Input x [1×4]</td><td class="mono">[1 2 3 4]</td><td class="mono">[1 0 0 0]</td></tr>
+<tr><td>x · W [1×4]<br><span class="meta">1·[1 2 3 4] + 2·[5 6 7 8] + 3·[9 10 11 12] + 4·[13 14 15 16]</span></td><td class="mono">[90 100 110 120]</td><td class="mono">[1 2 3 4]</td></tr>
+<tr><td>+ bias [0 0 0 −200]</td><td class="mono">[90 100 110 −80]</td><td class="mono">[1 2 3 −196]</td></tr>
+<tr><td>ReLU (negative becomes 0)</td><td class="mono"><b>[90 100 110 0]</b></td><td class="mono"><b>[1 2 3 0]</b></td></tr>
+</tbody></table></div>
+<ol class="steps">
+<li><p>Run the chip on it.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd (Setup A)</span><button type="button" data-copy>Copy</button></div><pre>cadence\run_modelsim.bat tiny</pre></div>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal (Setup B)</span><button type="button" data-copy>Copy</button></div><pre>bash cadence/run_xcelium.sh --prog build/tiny_prog.hex</pre></div></li>
+<li><p>Print what the chip answered. <code>show_tiny.py</code> needs nothing but Python itself. The simulator left its answers in <code>build/custom_readback.txt</code> on the machine where it ran, so run the decoder on that same machine.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd (Setup A), inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python sw\show_tiny.py</pre></div>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal (Setup B), inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python3 sw/show_tiny.py</pre></div>
+<pre class="out">image 0: chip returned word 0x006e645a -> numbers [90, 100, 110, 0]
+image 1: chip returned word 0x00030201 -> numbers [1, 2, 3, 0]</pre>
+<p>The numbers are the ones you computed by hand. That is the chip's arithmetic, including the bias and ReLU.</p></li>
+</ol>
+
+<!-- =============================== 7 ================================= -->
+<h2 id="s7">7. Job 2: look at the waveform</h2>
+
+<p>A <b>waveform</b> shows every chosen signal as a line against time. You will use it to see the chip's state machine working through the network, and to take screenshots for your report. The waveform uses only the first batch (8 pictures; about 2 400 clock cycles in all, of which the chip itself is busy for 1 771), so it opens quickly.</p>
+
+<h3>Setup A: ModelSim</h3>
+<ol class="steps">
+<li><p>Launch.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>cadence\run_modelsim.bat gui</pre></div>
+<p>The ModelSim window opens, compiles, simulates and fills the <b>Wave</b> window with the interesting signals already grouped under headings. If a box ever asks "Are you sure you want to finish?", click <b>No</b>: Yes closes ModelSim and your waveform with it.</p></li>
+<li><p>If the Wave window looks empty or cramped, click on it once, then press <kbd>f</kbd> (zoom full). To zoom into a region, hold <kbd>Ctrl</kbd> and use the mouse wheel, or drag with the middle mouse button.</p></li>
+<li><p>Click anywhere in the waveform to place a cursor. The value of every signal at that time appears in the left column.</p></li>
+</ol>
+
+<h3>Setup B: Xcelium (SimVision)</h3>
+<ol class="steps">
+<li><p>Launch.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>bash cadence/run_xcelium.sh --gui</pre></div>
+<p>SimVision opens with a <b>Design Browser</b> window (a hierarchy tree on the left, signal list on the right) and a <b>Console</b> window with a command prompt. The simulation is loaded but paused at time 0.</p></li>
+<li><p>In the Design Browser, expand the tree on the left by clicking the small triangle or plus sign next to: <code>tb_dnn_player</code> → <code>g_reg</code> → <code>dut</code> → <code>u_core</code> → <code>u_ctrl</code>. The right side now lists the controller's signals.</p></li>
+<li><p>Click <code>state</code>. Hold <kbd>Ctrl</kbd> and click <code>layer_cnt</code>, <code>kt_cnt</code>, <code>nt_cnt</code>, <code>m_cnt</code>, <code>busy</code>, <code>done</code>, <code>err</code>. Then click the toolbar button that sends selected signals to a waveform (its tooltip says "Send to Waveform Window"; it is also in the right-click menu). A Waveform window appears.</p></li>
+<li><p>Go back to the tree and repeat step 3 for these places:</p>
+<ul>
+<li><code>tb_dnn_player</code>: signals <code>clk</code>, <code>reg_wr_en</code>, <code>reg_addr</code>, <code>reg_wdata</code></li>
+<li><code>tb_dnn_player</code> → <code>g_reg</code> → <code>dut</code> → <code>u_core</code>: signals <code>acc_wr_en</code>, <code>acc_rd_en</code></li>
+<li><code>… u_core</code> → <code>u_core</code> (the array itself): signal <code>res_vld</code></li>
+</ul></li>
+<li><p>In the Console window, type <code>run</code> and press <kbd>Enter</kbd>. The simulation runs to its end in a few seconds.</p></li>
+<li><p>In the Waveform window use the zoom-to-fit button (hover over the toolbar icons to read their names) or the menu <b>View → Zoom → Fit</b>.</p></li>
+</ol>
+<div class="note warn"><span class="tag">Menu names</span>
+<p>I could not open SimVision here, so button and menu names come from how the tool is normally laid out. If one is missing, hover over the toolbar icons or look in the right-click menu; the actions (send signals to waveform, run, zoom to fit) exist in every version. As a fallback, run <code>bash cadence/run_xcelium.sh --wave</code>: it writes <code>build/dnn.vcd</code>, a standard waveform file that SimVision (<code>simvision build/dnn.vcd</code>) and free viewers such as GTKWave can open.</p></div>
+
+<h3>What you are looking at</h3>
+<figure>
+<svg viewBox="0 0 960 330" role="img" aria-label="Schematic waveform: register writes while the chip is idle, then START, then the state signal cycling through load weights, compute, drain, with kt_cnt increasing and res_vld high in one block of eight clocks inside each drain phase, and done rising at the end">
+  <defs><marker id="ar4" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="ar"/></marker></defs>
+  <!-- row labels -->
+  <g class="t-mono" text-anchor="end">
+    <text x="176" y="52">reg_wr_en</text><text x="176" y="96">state</text><text x="176" y="140">kt_cnt</text><text x="176" y="184">res_vld</text><text x="176" y="228">done</text>
+  </g>
+  <!-- phase bands -->
+  <rect x="190" y="26" width="200" height="236" fill="var(--skip-soft)" opacity="0.7"/>
+  <rect x="390" y="26" width="30" height="236" fill="var(--warn-soft)" opacity="0.9"/>
+  <text x="196" y="18" class="t-sm t-b">1  loading (about 480 writes)</text>
+  <text x="430" y="18" class="t-sm t-b">2  START pressed: the chip runs by itself</text>
+  <!-- reg_wr_en: dense pulses then START pulse then quiet -->
+  <path class="sig" d="M190,60 H194 V44 H197 V60 H201 V44 H204 V60 H208 V44 H211 V60 H215 V44 H218 V60 H222 V44 H225 V60 H229 V44 H232 V60 H236 V44 H239 V60 H243 V44 H246 V60 H250 V44 H253 V60 H257 V44 H260 V60 H264 V44 H267 V60 H271 V44 H274 V60 H278 V44 H281 V60 H285 V44 H288 V60 H292 V44 H295 V60 H299 V44 H302 V60 H306 V44 H309 V60 H313 V44 H316 V60 H320 V44 H323 V60 H327 V44 H330 V60 H334 V44 H337 V60 H341 V44 H344 V60 H348 V44 H351 V60 H355 V44 H358 V60 H362 V44 H365 V60 H369 V44 H372 V60 H378 V44 H383 V60 H386 H390 V44 H396 V60 H900"/>
+  <!-- state: idle, fetch, then LDW COMP DRAIN x2 ... -->
+  <g>
+    <rect class="hot" x="390" y="80" width="30" height="24"/><text x="405" y="97" text-anchor="middle" class="t-sm">1</text>
+    <rect class="box" x="190" y="80" width="200" height="24"/><text x="290" y="97" text-anchor="middle" class="t-sm">0  IDLE</text>
+    <rect class="py" x="420" y="80" width="32" height="24"/><text x="436" y="97" text-anchor="middle" class="t-sm">2</text>
+    <rect class="hw" x="452" y="80" width="64" height="24"/><text x="484" y="97" text-anchor="middle" class="t-sm">3</text>
+    <rect class="box" x="516" y="80" width="88" height="24"/><text x="560" y="97" text-anchor="middle" class="t-sm">4</text>
+    <rect class="py" x="604" y="80" width="32" height="24"/><text x="620" y="97" text-anchor="middle" class="t-sm">2</text>
+    <rect class="hw" x="636" y="80" width="64" height="24"/><text x="668" y="97" text-anchor="middle" class="t-sm">3</text>
+    <rect class="box" x="700" y="80" width="88" height="24"/><text x="744" y="97" text-anchor="middle" class="t-sm">4</text>
+    <rect class="py" x="788" y="80" width="32" height="24"/><text x="804" y="97" text-anchor="middle" class="t-sm">2</text>
+    <text x="860" y="97" text-anchor="middle" class="t-sm">… 76 passes</text>
+  </g>
+  <!-- kt_cnt -->
+  <g>
+    <rect class="box" x="420" y="124" width="184" height="24"/><text x="512" y="141" text-anchor="middle" class="t-sm">0  (nt = 0)</text>
+    <rect class="box" x="604" y="124" width="184" height="24"/><text x="696" y="141" text-anchor="middle" class="t-sm">0  (nt = 1)</text>
+    <text x="860" y="141" text-anchor="middle" class="t-sm">nt 2, 3, then kt = 1 …</text>
+  </g>
+  <!-- res_vld: one solid 8-clock block per pass, starting in the 2nd clock of DRAIN -->
+  <path class="sig" d="M190,196 H524 V180 H588 V196 H708 V180 H772 V196 H900"/>
+  <text x="620" y="176" text-anchor="middle" class="t-sm t-mut">one solid block of 8 clocks per pass (one result per picture)</text>
+  <!-- done -->
+  <path class="sig" d="M190,240 H900"/>
+  <text x="860" y="226" text-anchor="middle" class="t-sm t-mut">rises only after the last pass</text>
+  <!-- legend for states -->
+  <g class="t-sm">
+    <rect class="hot" x="200" y="278" width="14" height="10"/><text x="220" y="287">1 FETCH: read the layer's work order (1 clock per layer)</text>
+    <rect class="py" x="530" y="278" width="14" height="10"/><text x="550" y="287">2 LDW: load 16 weights (4 clocks)</text>
+    <rect class="hw" x="200" y="298" width="14" height="10"/><text x="220" y="307">3 COMP: feed 8 pictures (8 clocks)</text>
+    <rect class="box" x="530" y="298" width="14" height="10"/><text x="550" y="307">4 DRAIN: wait, then store the results (about 11 clocks)</text>
+  </g>
+  <text x="196" y="324" class="t-sm t-mut">(the loading phase is not drawn to scale)</text>
+</svg>
+<figcaption>Figure 4. What the waveform shows, drawn as a schematic. Phase 1: the testbench writes weights, biases and the picture; the chip is idle (state 0). Phase 2: START; the controller then repeats FETCH once per layer and LDW → COMP → DRAIN for every tile. The numbers are the values you will see in the <code>state</code> row; the cycle counts are the measured ones.</figcaption>
+</figure>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Signal</th><th>What it tells you</th></tr></thead>
+<tbody>
+<tr><td class="mono">state</td><td>0 IDLE, 1 FETCH, 2 LDW (load weights), 3 COMP (compute), 4 DRAIN (wait for results and store them)</td></tr>
+<tr><td class="mono">layer_cnt</td><td>0 while doing layer 1 (64 inputs → 16 neurons), then 1 for layer 2 (16 → 10)</td></tr>
+<tr><td class="mono">kt_cnt, nt_cnt</td><td>Which 4×4 tile is being processed. <code>nt_cnt</code> cycles 0–3 quickly inside each <code>kt_cnt</code> value; <code>kt_cnt</code> goes 0 to 15 in layer 1. 16 × 4 = 64 passes.</td></tr>
+<tr><td class="mono">m_cnt</td><td>Which of the 8 pictures is being fed (0–7) during COMP</td></tr>
+<tr><td class="mono">res_vld</td><td>High while finished sets of 4 sums come out of the array: one solid block of 8 clocks per pass (one set per picture, back to back)</td></tr>
+<tr><td class="mono">acc_wr_en / acc_rd_en</td><td>The partial-sum memory being written (all tiles except the last) and read (all tiles except the first). This is the "add the tiles together" traffic.</td></tr>
+<tr><td class="mono">busy, done, err</td><td>busy is high from START to the end; done goes high when the last layer finishes; err would go high if the chip rejected a layer description</td></tr>
+</tbody></table></div>
+
+<div class="note do"><span class="tag">Screenshots to take for the report</span>
+<ol>
+<li>The loading phase: <code>reg_wr_en</code>, <code>reg_addr</code>, <code>reg_wdata</code>, <code>busy</code>, <code>state</code> = 0. Caption: "the CPU stand-in loads weights and pictures".</li>
+<li>Zoomed on 2–3 passes: <code>state</code> cycling 2 → 3 → 4, with <code>kt_cnt</code>, <code>nt_cnt</code>, <code>res_vld</code>. Caption: "one tile pass = load 4 clocks, compute 8, drain about 11".</li>
+<li>A zoom on <code>acc_wr_en</code> and <code>acc_rd_en</code> across a change of <code>kt_cnt</code>. Caption: "partial sums accumulate across K-tiles".</li>
+<li>The end: <code>layer_cnt</code> changing from 0 to 1, and finally <code>done</code> rising.</li>
+</ol></div>
+
+<!-- =============================== 8 ================================= -->
+<h2 id="s8">8. Job 3: the Python side</h2>
+
+<p>You can skip this job and still have a passing simulation. It is what shows that the chip runs a <i>neural network</i> and not just a multiplier, and the accuracy figure in your report comes from it. It uses only Python and the folder you already have. None of it touches the Cadence tools.</p>
+
+<h3>8.1 Install the three libraries (once)</h3>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python -m pip install numpy onnx onnxruntime</pre></div>
+<p>It downloads a few tens of megabytes and ends with a line beginning <code>Successfully installed</code>. You do <b>not</b> need PyTorch (a multi-gigabyte download) because the training result is already shipped.</p>
+<div class="note warn"><span class="tag">If pip complains</span>
+<p>Python 3.13 is new. If pip reports "no matching distribution" for <code>onnxruntime</code>, first run <code>python -m pip install --upgrade pip</code> and retry. If it still fails, skip <code>quantize.py</code>: only numpy is needed for <code>compile.py</code>, <code>report.py</code>, <code>trace_one.py</code> and the pencil example, and the quantized network is already in <code>build/qnet.npz</code>. I tested these programs on Python 3.11, not 3.13.</p></div>
+
+<h3>8.2 Rebuild the chip's input</h3>
+<p>This redoes the middle of Figure 1: quantize, then compile. The result has exactly the same content as the <code>prog.hex</code> that was shipped (it is deterministic; on Windows the invisible line-ending characters may differ, which does not matter), so nothing changes, but you see how it is made.</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>cadence\python_flow.bat</pre></div>
+<p>On Linux (Setup B, Python on the server) the same two steps are:</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python3 sw/quantize.py
+python3 sw/compile.py</pre></div>
+<p>If you ran these on your PC but simulate on the server, copy the new <code>build/prog.hex</code> to the server's <code>build</code> folder before Job 1 (see the note in section 5).</p>
+<p>Output, shortened, with what each line means:</p>
+<pre class="out">layer 1: W(64, 16) relu=True s_w=0.01685 s_out=0.10071 mult=44203 shift=25 (real 0.001317 ~ 0.001317)
+layer 2: W(16, 10) relu=False s_w=0.01257 s_out=0.21849 mult=48617 shift=23 (real 0.005796 ~ 0.005796)
+float (onnxruntime) accuracy : 96.94%
+INT8 integer-only accuracy   : 96.94%   (this is what the RTL must reproduce)
+compiled 2 layers, 45 batches of 8: 9676 register ops (361 static), weight words 304/512
+  layer 0: K 64-&gt;64 (KT=16)  N 16-&gt;16 (NT=4)  passes=64  src=0 dst=128  wbase=0
+  layer 1: K 16-&gt;16 (KT=4)  N 10-&gt;12 (NT=3)  passes=12  src=128 dst=0  wbase=256</pre>
+<div class="tablewrap"><table>
+<thead><tr><th>Line</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td class="mono">W(64, 16)</td><td>Layer 1's weight table has 64 rows (pixels) and 16 columns (neurons).</td></tr>
+<tr><td class="mono">s_w=0.01685</td><td>The scale used to turn this layer's decimal weights into whole numbers.</td></tr>
+<tr><td class="mono">mult=44203 shift=25</td><td>The "multiply then shift" pair that approximates the rescaling factor 0.001317 with integers.</td></tr>
+<tr><td class="mono">float / INT8 accuracy</td><td>The decimal network and the whole-number network both get 96.94 % of the 360 test pictures right, so the conversion cost nothing.</td></tr>
+<tr><td class="mono">9676 register ops</td><td>Keypad presses in <code>prog.hex</code>: 361 to set the chip up, then exactly 207 per batch of 8 pictures, times 45 batches.</td></tr>
+<tr><td class="mono">weight words 304/512</td><td>The weight memory has room for 512 rows of weights; the network uses 304.</td></tr>
+<tr><td class="mono">K 64-&gt;64 (KT=16)</td><td>64 inputs, which need 16 tiles of 4 to cover them (KT = number of K-tiles).</td></tr>
+<tr><td class="mono">N 10-&gt;12 (NT=3)</td><td>10 outputs, rounded up to 12 with zero weights so they fill 3 tiles of 4.</td></tr>
+<tr><td class="mono">passes=64</td><td>16 × 4 = 64 times the array is loaded with a fresh weight tile for this layer.</td></tr>
+<tr><td class="mono">src / dst / wbase</td><td>Memory addresses: where the layer reads its input, where it writes its output (the two swap roles for the next layer), where its weights start.</td></tr>
+</tbody></table></div>
+
+<h3>8.3 Get the report from the chip's answers</h3>
+<p>After Job 1 the simulator left <code>build/rtl_readback.txt</code>. On Setup B it is on the server: copy it into the <code>build</code> folder on your PC first (section 5 note), or run the Linux form below on the server. Turn it into numbers:</p>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>cadence\python_report.bat</pre></div>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal (Setup B, Python on the server), inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python3 sw/report.py</pre></div>
+<p>Shortened; the real output has a few extra lines.</p>
+<pre class="out">images classified by the RTL     : 360
+float model accuracy (PyTorch)   :  96.94 %
+INT8 python golden accuracy      :  96.94 %
+INT8 accuracy measured FROM RTL  :  96.94 %
+per batch of 8 images (cycles from the RTL perf counters):
+  busy cycles          :     1771   (221 cycles/image)
+  useful MACs          :     9472   (5.35 MAC/cycle, peak 16)
+  array utilization    :     33.4 %
+  weight-SRAM reads    :      304 words
+  act-SRAM reads       :      160 words
+  LRB reads (reuse)    :      448 words
+  activation fetches served by the LRB : 73.7 %  (act-SRAM reads cut 3.80x)
+  bytes moved per useful MAC: weights 0.128 + activations 0.257 + partial sums 1.865 = 2.250
+  at 100 MHz:    451722 images/s   (pre-synthesis estimate)</pre>
+<ul>
+<li><b>The three accuracies are the headline.</b> Three independent computations of the same network (decimal, integer in Python, and your Verilog chip) give the same 96.94 %. The last line is computed only from numbers the chip returned.</li>
+<li><b>221 cycles per image, 5.35 MACs per cycle</b> of a possible 16: the chip does about a third of its peak. The rest of the time it is loading weights and emptying its pipeline (section 7, Figure 4).</li>
+<li><b>The reads lines</b> show memory traffic. The small "reuse buffer" answered 448 of 608 activation fetches, so the big memory was read 3.8 times less.</li>
+<li><b>Bytes per MAC 2.25 versus 2.0:</b> at this small 4×4 size the design moves slightly <i>more</i> bytes per multiply than a design with no reuse, because partial sums shuttle in and out of memory. A 16×16 array gets 0.43. This is an honest finding to put in your report; <code>docs/00</code> explains why.</li>
+<li><b>451 722 images/s</b> is arithmetic on the cycle count assuming a 100 MHz clock. It is not a measurement of any chip. Replace it with your real clock after Job 4.</li>
+</ul>
+
+<h3>8.4 Follow one picture through the network</h3>
+<div class="cmd"><div class="bar"><span>Type in: Windows cmd, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>python sw\trace_one.py 0 5</pre></div>
+<p>(On Linux: <code>python3 sw/trace_one.py 0 5</code>.)</p>
+<p>It prints picture number 0 (a 7) as an 8×8 grid, then the first five products neuron 5 computes (and how many more there are), the sum <code>29657</code>, the bias, the rescale to <code>45</code>, all 16 layer-1 outputs, and the final ten scores with the winning digit. Read it once slowly; it is the most useful five minutes in the project. Try <code>python sw\trace_one.py 17 5</code> for another picture.</p>
+
+<h3>8.5 Experiment with the pencil example</h3>
+<ol class="steps">
+<li><p>Open <code>sw\example_tiny_net.py</code> in Notepad (right-click → <b>Open with</b> → <b>Notepad</b>). Find the line <code>MULT, SHIFT, RELU = 1, 0, True</code>. Change <code>0</code> to <code>1</code> and save. This tells the chip to halve every result.</p></li>
+<li><p>Run <code>python sw\example_tiny_net.py</code>. It prints the answers it expects: <code>[[45 50 55 0] [1 1 2 0]]</code>. Then simulate again (section 6, pencil example, step 1) and run the decoder, <code>python sw\show_tiny.py</code>. The chip must return the same numbers. (90 halved is 45; 1 halved and rounded is 1.)</p>
+<p><b>Setup B, Python on your PC:</b> the simulator only sees your change if the new <code>build/tiny_prog.hex</code> is on the server, and the decoder only sees the chip's new answer if <code>build/custom_readback.txt</code> is back on the PC. Simplest is to do this whole experiment on the server: <code>python3 sw/example_tiny_net.py</code>, then <code>bash cadence/run_xcelium.sh --prog build/tiny_prog.hex</code>, then <code>python3 sw/show_tiny.py</code>. If <code>show_tiny.py</code> prints the old numbers <code>[90, 100, 110, 0]</code>, it is reading a stale file.</p></li>
+<li><p>Change the numbers in <code>X</code> or <code>W</code> and predict the output before you run it. When prediction and chip agree, you have understood what the accelerator does.</p></li>
+</ol>
+
+<div class="note skip"><span class="tag">Not needed</span>
+<p><code>train_mlp.py</code> retrains the network. It needs PyTorch and a different hardware size if you widen the network, which is a bigger project. Tell me if your guide wants a different network and I will prepare the files.</p></div>
+
+<!-- =============================== 9 ================================= -->
+<h2 id="s9">9. Job 4: synthesis in Genus</h2>
+
+<p>Jobs 1–3 proved the design <i>works</i>. Job 4 answers the next question a chip person asks: <b>how big is it, how fast can it run, how much power does it use?</b> Only a synthesis tool can tell you, and Genus is yours.</p>
+
+<h3>9.1 What synthesis is</h3>
+<p><b>Analogy.</b> Your Verilog is an architect's drawing: "here is a room that adds two numbers". A builder cannot order a drawing; a builder orders parts from a catalogue. <b>Synthesis</b> is the step that turns the drawing into a parts list: "12 000 NAND gates of catalogue type NAND2X1, 32 000 flip-flops of type DFFQX1, joined by these wires". The catalogue belongs to a chip factory and is called a <b>standard-cell library</b>; its file is a <code>.lib</code>. For every cell it lists delay, area and power. Genus adds these up to give you the three numbers for the report.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>Genus needs</th><th>What it is</th><th>Where it comes from</th></tr></thead>
+<tbody>
+<tr><td>The design</td><td><code>rtl/*.v</code> (13 files for the core)</td><td class="mono">already in the zip</td></tr>
+<tr><td>The catalogue</td><td><code>.lib</code> file(s): timing, area and power of each real cell</td><td><b>your lab</b>: depends on the chip technology you use</td></tr>
+<tr><td>The speed goal</td><td><code>cadence/constraints.sdc</code>: "the clock is 10 ns, the bus pins arrive 4 ns late"</td><td class="mono">already in the zip, you only change one number</td></tr>
+</tbody></table></div>
+
+<div class="note warn"><span class="tag">Honest limit</span>
+<p>I never had Genus, so <code>cadence/genus_synth.tcl</code> is a template I wrote from the tool's documented commands. It has not been run. It is short and the commands are standard, but expect that one line may need a small fix. Section 11 lists the messages you are likely to see.</p></div>
+
+<h3>9.2 Ask your lab for four things (one message)</h3>
+<p>I cannot know your lab's technology folder. Send this message to your lab administrator, teaching assistant or guide, and paste the answers into the steps below:</p>
+
+<div class="cmd"><div class="bar"><span>Message to send (not a command)</span><button type="button" data-copy>Copy</button></div><pre>I want to synthesize a Verilog design with Genus. Please tell me:
+1. The folder and the file name(s) of the standard-cell .lib file(s)
+   for the technology we use (typical or slow corner is fine).
+2. The command or setup script that makes "genus" and "xrun" work in my terminal.
+3. Which LEF files and which Innovus template I should use later for place and route.
+4. Whether a memory compiler is available, or whether flip-flop memories are acceptable.</pre></div>
+
+<h3>9.3 Run it</h3>
+<p>Genus runs on the lab's Linux machine, so this is Setup B from section 5 (the project folder must be on that machine; WinSCP copies it over).</p>
+
+<ol class="steps">
+<li><p>Open a terminal on the Linux machine and go to the project folder.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal</span><button type="button" data-copy>Copy</button></div><pre>cd ~/systolic_dnn_accel
+ls cadence</pre></div>
+<p>The second command must list <code>genus_synth.tcl</code> and <code>constraints.sdc</code>. If not, you are in the wrong folder.</p></li>
+
+<li><p>Open the template in a text editor and fill in the two lines that contain <code>&lt;&lt;&lt;</code>.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal</span><button type="button" data-copy>Copy</button></div><pre>gedit cadence/genus_synth.tcl &amp;</pre></div>
+<p>If <code>gedit</code> is not installed, use <code>nano cadence/genus_synth.tcl</code> (save with <kbd>Ctrl</kbd>+<kbd>O</kbd>, <kbd>Enter</kbd>, leave with <kbd>Ctrl</kbd>+<kbd>X</kbd>). Replace the text between the quotes with the answers from question 1. The lines must look like this afterwards (the folder and file names below are examples, yours differ):</p>
+<pre class="out">set LIB_DIR    "/pdk/mytech/lib/"
+set LIB_FILES  "typical.lib"</pre>
+<p>Keep the quotation marks. If there are several <code>.lib</code> files, put them in the same quotes separated by a space.</p></li>
+
+<li><p>Start Genus. The <code>-f</code> option means "run this script", <code>-log</code> saves everything it prints.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>genus -f cadence/genus_synth.tcl -log genus.log</pre></div></li>
+
+<li><p>Wait. Genus prints a banner and many lines. The design holds about 32 000 bits of memory that the tool builds out of flip-flops (see 9.5), so this can take from a few minutes to about an hour. Do not press anything. When it finishes you see this line and the terminal returns:</p>
+<pre class="out">DONE - open genus_out/timing.rpt, area.rpt, power.rpt</pre></li>
+
+<li><p>Check that nothing was silently wrong.</p>
+<div class="cmd"><div class="bar"><span>Type in: Linux terminal, inside systolic_dnn_accel</span><button type="button" data-copy>Copy</button></div><pre>grep -i -E "error|unresolved" genus.log | head -20
+ls genus_out</pre></div>
+<p>The first command should print nothing serious (a few harmless warnings are normal). <code>ls</code> must list <code>timing.rpt area.rpt power.rpt gates.rpt</code>, the netlist <code>dnn_accel_top_netlist.v</code> and <code>dnn_accel_top.sdc</code>.</p></li>
+</ol>
+
+<h3>9.4 Read the three reports</h3>
+<p>Open each file with <code>gedit genus_out/timing.rpt</code> (or WinSCP it back to Windows and open it in Notepad).</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>File</th><th>What to look for</th><th>What to copy into your report</th></tr></thead>
+<tbody>
+<tr><td class="mono">timing.rpt</td><td>The worst signal path, then a line containing <b>slack</b> (Genus prints it as "Timing slack"). Slack is spare time: how much earlier than the deadline the slowest signal arrives. <b>Check the unit printed next to the number: Genus normally reports picoseconds (ps), and 1000 ps = 1 ns.</b></td><td>the slack value with its unit, and the clock period you used</td></tr>
+<tr><td class="mono">area.rpt</td><td>A "Total area" line. The unit is set by the library (usually µm²); the header of the report or the library documentation says which.</td><td>total area and unit; cell count from <code>gates.rpt</code></td></tr>
+<tr><td class="mono">power.rpt</td><td>A total, usually split into leakage (power when idle), internal and switching (power when signals move).</td><td>total power and the split</td></tr>
+<tr><td class="mono">gates.rpt</td><td>How many cells of each kind. Expect a very large number of flip-flops.</td><td>number of flip-flops versus logic cells</td></tr>
+</tbody></table></div>
+
+<div class="note idea"><span class="tag">How to read slack</span>
+<p><b>Slack ≥ 0:</b> the design meets the 10 ns clock you asked for. <b>Slack &lt; 0:</b> too slow. Either way the fastest clock the design can take is roughly <b>period − slack</b>, with both in the same unit (convert ps to ns first: 1 300 ps = 1.3 ns).</p>
+<p>Example A (numbers invented): period 10 ns, slack +1.3 ns → about 8.7 ns → 1000 / 8.7 ≈ 115 MHz.<br>Example B: period 10 ns, slack −2.0 ns → about 12 ns → 1000 / 12 ≈ 83 MHz.</p></div>
+
+<p>To find the real limit, change the clock period and rerun:</p>
+<ol class="steps">
+<li><p>Open <code>cadence/constraints.sdc</code> and edit the line <code>set clk_period 10.0</code>. Put the value you computed (for example <code>12.5</code> after example B, so you have a little margin) and save.</p></li>
+<li><p>Run the same <code>genus -f ...</code> command again. Slack should now be ≥ 0.</p></li>
+<li><p>Report the <b>smallest period that still gave slack ≥ 0</b> as your maximum clock, together with its area and power. Area and power change slightly with the period, so always quote all three numbers from the same run.</p></li>
+</ol>
+
+<h3>9.5 Two things to say honestly in your report</h3>
+<ul>
+<li><b>The memories became flip-flops.</b> The design's memories are written as plain Verilog arrays (<code>rtl/sram_sdp.v</code>), so Genus builds each stored bit from a flip-flop: 30 976 bits in the five memories plus 1 024 bits in the layer-description store. A real chip would use compiled SRAM macros, which are much smaller. Say so, and treat the area as an upper bound. (<code>docs/06</code>, section 3 explains how to swap them.)</li>
+<li><b>The power is a statistical guess.</b> Without an activity file Genus assumes how often signals switch. A better number uses the simulation's own activity (<code>docs/06</code> mentions <code>read_vcd</code> and <code>report_power</code>). For a first report, quote the estimate and label it an estimate.</li>
+</ul>
+
+<h3>9.6 Turning the numbers into speed and energy</h3>
+<p>The simulation gave you cycles (1 771 per batch of 8 pictures, 221.4 per picture). Synthesis gave you a clock frequency <i>f</i> and a power <i>P</i>. Multiply:</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Quantity</th><th>Formula</th><th>Worked example (P = 10 mW is invented; f = 100 MHz)</th></tr></thead>
+<tbody>
+<tr><td>Time per picture</td><td>221.4 cycles ÷ <i>f</i></td><td>221.4 ÷ 100 MHz = 2.21 µs</td></tr>
+<tr><td>Pictures per second</td><td><i>f</i> ÷ 221.4</td><td>≈ 451 700 per second</td></tr>
+<tr><td>Energy per picture</td><td><i>P</i> × time per picture</td><td>10 mW × 2.21 µs = 22.1 nJ</td></tr>
+</tbody></table></div>
+
+<h3>9.7 After Genus: Innovus (place and route)</h3>
+<p><b>Analogy.</b> Genus wrote the parts list. Innovus is the town planner: it decides where every part sits on the silicon, draws the power lines, builds the clock distribution (so every flip-flop hears the clock at almost the same moment), and lays down the wires. The result is a layout, the file a foundry would manufacture from.</p>
+
+<figure>
+<svg viewBox="0 0 960 318" role="img" aria-label="Back-end flow: Verilog goes into Genus together with a cell library and a constraints file; Genus writes a gate netlist and reports; Innovus takes the netlist plus LEF files and produces the layout. Xcelium simulation branches off from the Verilog.">
+  <defs><marker id="ar5" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" class="ar"/></marker></defs>
+
+  <rect class="box" x="208" y="12" width="76" height="46" rx="4"/>
+  <text x="246" y="32" text-anchor="middle" class="t-b">.lib</text><text x="246" y="49" text-anchor="middle" class="t-sm">cell data</text>
+  <rect class="box" x="292" y="12" width="76" height="46" rx="4"/>
+  <text x="330" y="32" text-anchor="middle" class="t-b">.sdc</text><text x="330" y="49" text-anchor="middle" class="t-sm">speed goal</text>
+  <path class="wire" d="M246,58 V108" marker-end="url(#ar5)"/>
+  <path class="wire" d="M330,58 V108" marker-end="url(#ar5)"/>
+
+  <rect class="box" x="16" y="110" width="160" height="66" rx="4"/>
+  <text x="96" y="136" text-anchor="middle" class="t-b">Your Verilog</text><text x="96" y="156" text-anchor="middle" class="t-mono">rtl/*.v</text>
+  <rect class="hot" x="208" y="110" width="160" height="66" rx="4"/>
+  <text x="288" y="136" text-anchor="middle" class="t-b">Genus</text><text x="288" y="156" text-anchor="middle" class="t-sm">Job 4: synthesis</text>
+  <rect class="box" x="400" y="110" width="160" height="66" rx="4"/>
+  <text x="480" y="136" text-anchor="middle" class="t-b">Gate netlist</text><text x="480" y="156" text-anchor="middle" class="t-mono">*_netlist.v</text>
+  <rect class="box" x="592" y="110" width="160" height="66" rx="4" stroke-dasharray="6 4"/>
+  <text x="672" y="136" text-anchor="middle" class="t-b">Innovus</text><text x="672" y="156" text-anchor="middle" class="t-sm">place and route</text>
+  <rect class="box" x="784" y="110" width="160" height="66" rx="4" stroke-dasharray="6 4"/>
+  <text x="864" y="136" text-anchor="middle" class="t-b">Layout</text><text x="864" y="156" text-anchor="middle" class="t-sm">what a foundry makes</text>
+  <path class="wire" d="M176,143 H206" marker-end="url(#ar5)"/>
+  <path class="wire" d="M368,143 H398" marker-end="url(#ar5)"/>
+  <path class="wire" d="M560,143 H590" marker-end="url(#ar5)"/>
+  <path class="wire" d="M752,143 H782" marker-end="url(#ar5)"/>
+
+  <rect class="box" x="632" y="12" width="80" height="46" rx="4" stroke-dasharray="6 4"/>
+  <text x="672" y="32" text-anchor="middle" class="t-b">LEF</text><text x="672" y="49" text-anchor="middle" class="t-sm">cell shapes</text>
+  <path class="wire" d="M672,58 V108" marker-end="url(#ar5)"/>
+
+  <rect class="hw" x="16" y="216" width="160" height="66" rx="4"/>
+  <text x="96" y="242" text-anchor="middle" class="t-b">Xcelium / ModelSim</text><text x="96" y="262" text-anchor="middle" class="t-sm">Jobs 1 and 2: does it work?</text>
+  <path class="wire" d="M96,176 V214" marker-end="url(#ar5)"/>
+
+  <rect class="box" x="198" y="216" width="180" height="66" rx="4"/>
+  <text x="288" y="242" text-anchor="middle" class="t-b">timing / area / power</text><text x="288" y="262" text-anchor="middle" class="t-mono">genus_out/*.rpt</text>
+  <path class="wire" d="M288,176 V214" marker-end="url(#ar5)"/>
+
+  <rect class="box" x="582" y="216" width="180" height="66" rx="4" stroke-dasharray="6 4"/>
+  <text x="672" y="242" text-anchor="middle" class="t-b">final reports</text><text x="672" y="262" text-anchor="middle" class="t-sm">timing, area, power with wires</text>
+  <path class="wire" d="M672,176 V214" marker-end="url(#ar5)"/>
+
+  <text x="480" y="308" text-anchor="middle" class="t-sm t-mut">solid = covered by this guide · dashed = needs your lab's technology files</text>
+</svg>
+<figcaption>Figure 5. Where each tool sits. Genus needs a cell library and a constraints file and produces a gate netlist plus the three reports for your write-up. Innovus continues from the netlist but needs technology files that only your lab has.</figcaption>
+</figure>
+
+<div class="note warn"><span class="tag">Why there is no click-by-click Innovus section</span>
+<p>Place and route cannot be started without the technology's LEF files, parasitic-extraction files and your lab's Innovus template. I do not have them, and typing guessed paths would only produce errors. Two ways forward: (1) ask your guide whether place and route is required for the project or whether Genus results are enough; (2) if it is required, send me the technology name, the LEF file paths and your lab's Innovus template, and I will write an <code>innovus_pnr.tcl</code> in the same style as the Genus one, with exact steps.</p></div>
+
+<!-- =============================== 10 ================================= -->
+<h2 id="s10">10. Job 5: numbers for your report</h2>
+
+<p>Everything in the first table was measured on the design; you can reproduce it with Job 1 and <code>cadence\python_report.bat</code>. The second table is what you fill in after Genus.</p>
+
+<h3>10.1 Numbers already measured (default 4×4 array, batch of 8 pictures)</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Quantity</th><th class="num">Value</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Network</td><td class="num">64 → 16 → 10</td><td>two layers, 8×8 handwritten digits</td></tr>
+<tr><td>Multiply-adds per picture</td><td class="num">1 184</td><td>64×16 + 16×10</td></tr>
+<tr><td>Test pictures</td><td class="num">360</td><td>45 batches of 8</td></tr>
+<tr><td>Accuracy: decimal / integer Python / RTL</td><td class="num">96.94 % each</td><td>the integer conversion and the chip lose nothing</td></tr>
+<tr><td>Cycles per batch of 8</td><td class="num">1 771</td><td>221.4 per picture</td></tr>
+<tr><td>Passes per batch</td><td class="num">76</td><td>times the array is filled with a new weight tile (64 + 12)</td></tr>
+<tr><td>Where the cycles go</td><td class="num">2 / 304 / 608 / 857</td><td>fetch / load weights / compute / drain (sums to 1 771)</td></tr>
+<tr><td>Useful MACs per cycle</td><td class="num">5.35 of 16</td><td>9 472 useful multiply-adds ÷ 1 771 cycles</td></tr>
+<tr><td>Array utilization</td><td class="num">33.4 %</td><td>5.35 ÷ 16</td></tr>
+<tr><td>Activation memory reads</td><td class="num">160</td><td>plus 448 served by the reuse buffer: 3.8× fewer big-memory reads</td></tr>
+<tr><td>Weight memory reads</td><td class="num">304</td><td>each weight row read once per batch</td></tr>
+<tr><td>Bytes moved per MAC</td><td class="num">2.250</td><td>0.128 weights + 0.257 activations + 1.865 partial sums (16×16 array: 0.43)</td></tr>
+<tr><td>Tests passed</td><td class="num">1 088 compared reads, 0 mismatches</td><td>8 ID/config words + 1 080 output words</td></tr>
+<tr><td>Verification strength</td><td class="num">19 of 19</td><td>deliberately broken copies of the design were all caught (<code>docs/06</code>)</td></tr>
+</tbody></table></div>
+
+<h3>10.2 Numbers you fill in after Job 4</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Quantity</th><th>Your value</th><th>Where from</th></tr></thead>
+<tbody>
+<tr><td>Technology / library name</td><td>______</td><td>your lab</td></tr>
+<tr><td>Clock period used (ns) and slack (ns)</td><td>______</td><td><code>constraints.sdc</code>, <code>timing.rpt</code></td></tr>
+<tr><td>Maximum clock = 1000 ÷ (period − slack) MHz</td><td>______</td><td>9.4</td></tr>
+<tr><td>Total area and unit</td><td>______</td><td><code>area.rpt</code></td></tr>
+<tr><td>Number of flip-flops / logic cells</td><td>______</td><td><code>gates.rpt</code></td></tr>
+<tr><td>Total power (mW)</td><td>______</td><td><code>power.rpt</code></td></tr>
+<tr><td>Pictures per second = <i>f</i> ÷ 221.4</td><td>______</td><td>9.6</td></tr>
+<tr><td>Energy per picture = <i>P</i> × 221.4 ÷ <i>f</i></td><td>______</td><td>9.6</td></tr>
+</tbody></table></div>
+
+<h3>10.3 A report outline that fits this project</h3>
+<ol>
+<li><b>Motivation:</b> why neural-network inference needs dedicated hardware (many multiply-adds, mostly the same weights reused).</li>
+<li><b>The network and INT8 quantization:</b> 64→16→10, why whole numbers are enough (Figure 1 and section 2 of this guide; <code>docs/01</code>).</li>
+<li><b>Architecture:</b> weight-stationary 4×4 array, reuse buffer, post-processing unit (bias, rescale, ReLU), controller, register interface (<code>docs/02</code>, <code>docs/05</code>).</li>
+<li><b>Verification:</b> 360 pictures bit-exact against the Python answer key, random-network regression, the 19 deliberately broken designs (<code>docs/06</code>).</li>
+<li><b>Results:</b> tables 10.1 and 10.2, the waveform screenshots from Job 2, the cycle breakdown.</li>
+<li><b>Discussion:</b> 33.4 % utilization and why (each pass spends 4 cycles loading weights, 8 computing and about 11 draining the pipeline, so the array computes for roughly a third of the time); the 2.25 bytes per MAC finding; flip-flop memories; what a bigger array does (<code>docs/04</code> roadmap).</li>
+<li><b>Limits and future work:</b> SRAM macros, place and route, larger networks.</li>
+</ol>
+
+<div class="note idea"><span class="tag">If your guide asks: "why Python and C?"</span>
+<p>The chip only multiplies and adds whole numbers, so something outside it must train the network, convert it to whole numbers and plan which memory address each number goes to; that is the Python part. In a real product a processor would press the chip's registers by running a program, and the C driver is that program; in this project the testbench plays the processor. The C driver is included, and tested to produce exactly the same register writes as the Python compiler, to show that the chip is usable by real software and that its register map is documented correctly.</p></div>
+
+<!-- =============================== 11 ================================= -->
+<h2 id="s11">11. If something fails</h2>
+
+<p>Nothing here is unusual for a first run on a new machine. Find the message, apply the fix. If it is not in the table, go to the end of this section.</p>
+
+<div class="tablewrap"><table>
+<thead><tr><th>What you see</th><th>Why</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td><code>'vsim' is not recognized as an internal or external command</code> (or <code>xrun: command not found</code>)</td><td>The tool exists but cmd or the shell does not know where.</td><td>Ask the lab for the setup command (question 2 in 9.2), or use the ModelSim shortcut in the Start menu that opens a prompt with the tool available. On Windows you can also type the full path in quotes, e.g. <code>"C:\...\win64\vsim.exe" -c -do cadence/run_modelsim.do</code> (the folder is called <code>win32</code>, <code>win64</code> or <code>win32aloem</code> depending on your edition; look for <code>vsim.exe</code>).</td></tr>
+<tr><td><code>'python' is not recognized</code>, or a Microsoft Store window opens</td><td>Python is not on the PATH, or Windows uses its store stub.</td><td>Try <code>py --version</code>. If that works, use <code>py</code> in place of <code>python</code> everywhere (and edit the two <code>.bat</code> files in <code>cadence</code> the same way). Otherwise reinstall Python and tick <b>Add python.exe to PATH</b>.</td></tr>
+<tr><td><code>ModuleNotFoundError: No module named 'numpy'</code></td><td>The add-on library is not installed.</td><td><code>python -m pip install numpy</code></td></tr>
+<tr><td><code>pip</code> says "no matching distribution" for onnx or onnxruntime</td><td>Python 3.13 is new; these libraries may not have a build yet.</td><td><code>python -m pip install --upgrade pip</code> and retry. Otherwise skip <code>quantize.py</code>: the converted network is already in <code>build\qnet.npz</code>, so run <code>python sw\compile.py</code> alone.</td></tr>
+<tr><td><code>pip</code> cannot connect to the internet</td><td>Lab or campus proxy.</td><td>Ask the lab for the proxy setting. Job 3 is optional; Jobs 1, 2 and 4 do not need pip.</td></tr>
+<tr><td><code>program file empty or not found</code> followed by <code>*** PLAYER FAILED ***</code> at time 0 (often preceded by a <code>$readmemh</code> warning)</td><td>The tool was started in the wrong folder, so <code>build/prog.hex</code> was not found.</td><td><code>cd</code> into the folder that contains <code>rtl</code>, <code>tb</code> and <code>build</code>, then run <code>dir build\prog.hex</code> (Windows) or <code>ls build/prog.hex</code> (Linux) to confirm.</td></tr>
+<tr><td>The <code>.bat</code> window flashes and closes</td><td>You double-clicked a script that failed immediately.</td><td>Open cmd first (section 5), then type the script name so the message stays on screen.</td></tr>
+<tr><td>Licence message such as "checkout failed" or "cannot connect to licence server"</td><td>The tool cannot reach the lab's licence server.</td><td>Work from the lab machine or the lab VPN, or ask the administrator. Nothing in the design causes this.</td></tr>
+<tr><td><code>$'\r': command not found</code> or <code>bad interpreter</code> when running a <code>.sh</code> file on Linux</td><td>The file picked up Windows line endings on its way over (an editor or a transfer program can do this).</td><td>Fix the file in place: <code>sed -i 's/\r$//' cadence/run_xcelium.sh</code>, then run it again. Do the same for any other file that shows this message.</td></tr>
+<tr><td>Errors mentioning <code>timescale</code></td><td>The testbench has a timescale and the design files have none; the order matters.</td><td>Use the provided scripts, which list the testbench first. If you write your own command, keep <code>tb/tb_dnn_player.v</code> before <code>-f cadence/rtl_files.f</code>.</td></tr>
+<tr><td>Red lines / <code>X</code> at the very start of the waveform</td><td>Signals have no value before the reset is released.</td><td>Normal. Look after the reset ends; the summary line and 0 mismatches are what count.</td></tr>
+<tr><td>The AXI run (<code>--axi</code> or <code>axi</code>) is rejected</td><td>Your tool version may treat the parameter override differently.</td><td>Skip it. The AXI wrapper is an extra; Job 1 without it is complete.</td></tr>
+<tr><td>Genus: <code>unresolved</code> reference</td><td>A file is missing from the <code>read_hdl</code> list, or the working folder is wrong.</td><td>Start Genus from the project root; check that <code>rtl/</code> holds the 13 files named in <code>genus_synth.tcl</code>.</td></tr>
+<tr><td>Genus: a syntax error at <code>$clog2</code> right after <code>read_hdl</code></td><td>The <code>-v2001</code> option is strict, and <code>$clog2</code> is a Verilog-2005 function.</td><td>In <code>cadence/genus_synth.tcl</code> change <code>read_hdl -v2001 {</code> to <code>read_hdl -sv {</code> and run again. (I checked that the design also compiles in SystemVerilog mode.)</td></tr>
+<tr><td>Genus: cannot find library / no cells</td><td>The two <code>&lt;&lt;&lt;</code> lines are wrong.</td><td>Check the folder and file names against <code>ls</code> on the machine where Genus runs. The path must exist there.</td></tr>
+<tr><td>Genus: "no ports matched" for <code>reg_addr[*]</code> and similar</td><td>The design was elaborated under a different top name.</td><td>The top must be <code>dnn_accel_top</code> (the <code>DESIGN</code> line of the template).</td></tr>
+<tr><td>Timing slack is negative</td><td>The 10 ns goal is too aggressive for this library.</td><td>Not a failure. Raise <code>clk_period</code> as in 9.4.</td></tr>
+<tr><td><code>*** PLAYER FAILED ***</code> or mismatches above 0</td><td>Something differs from the expected answers.</td><td>Follow the last paragraph below.</td></tr>
+</tbody></table></div>
+
+<div class="note do"><span class="tag">If it is not in the table</span>
+<p>Send me: (1) the exact command you typed, (2) the last 30 lines the window printed, and for a mismatch the first ten lines containing <code>FAIL</code>, (3) the name and version of the tool (<code>vsim -version</code> or <code>xrun -version</code>). With those I can tell whether it is your setup or my script.</p></div>
+
+<!-- =============================== 12 ================================= -->
+<h2 id="s12">12. Every file, one line each</h2>
+
+<p>Root of the project: <code>systolic_dnn_accel/</code>. Files marked <span class="pill need">use</span> are the ones you touch; <span class="pill skip">ignore</span> are safe to leave alone.</p>
+
+<h3>Top level</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">README.md</td><td>The project's front page. Written for Linux and Verilator users; this guide replaces its "how to run" part for you.</td></tr>
+<tr><td class="mono">requirements.txt</td><td>List of Python libraries for the full flow, including PyTorch. You only need numpy (and onnx, onnxruntime for quantize.py).</td></tr>
+</tbody></table></div>
+
+<h3>cadence/  <span class="pill need">use</span></h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">rtl_files.f</td><td>The list of the 15 design files, in the order the tools read them.</td></tr>
+<tr><td class="mono">run_xcelium.sh</td><td>Job 1 and 2 on Xcelium (Linux). Options: <code>--wave</code>, <code>--gui</code>, <code>--axi</code>, <code>--prog FILE</code>.</td></tr>
+<tr><td class="mono">run_modelsim.bat</td><td>Job 1 and 2 on ModelSim (Windows). Options: none, <code>axi</code>, <code>tiny</code>, <code>gui</code>, <code>pe</code>, <code>pegui</code>.</td></tr>
+<tr><td class="mono">run_pe_xcelium.sh</td><td>Runs the single-PE testbench (<code>tb/tb_pe.v</code>) on Xcelium; <code>--gui</code> opens SimVision. Explained in <code>RTL_EXPLAINED.html</code>.</td></tr>
+<tr><td class="mono">run_pe_modelsim.do, run_pe_modelsim_gui.do</td><td>The ModelSim command lists behind <code>run_modelsim.bat pe</code> and <code>pegui</code>.</td></tr>
+<tr><td class="mono">run_modelsim.do, run_modelsim_axi.do, run_modelsim_gui.do, run_modelsim_tiny.do</td><td>The ModelSim command lists that the <code>.bat</code> calls: normal, AXI wrapper, waveform window, pencil example.</td></tr>
+<tr><td class="mono">python_flow.bat, python_report.bat</td><td>Job 3 on Windows: rebuild the chip's input; print the accuracy and speed report.</td></tr>
+<tr><td class="mono">genus_synth.tcl, constraints.sdc</td><td>Job 4: Genus script (fill in two lines) and timing goals (change one number).</td></tr>
+</tbody></table></div>
+
+<h3>rtl/  <span class="pill need">the chip</span></h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">pe.v</td><td>One processing element: multiplies a weight by an activation and adds to a running sum.</td></tr>
+<tr><td class="mono">skew_delay.v</td><td>Delay lines that stagger the inputs so numbers meet the right weights at the right moment.</td></tr>
+<tr><td class="mono">systolic_array.v</td><td>The 4×4 grid of processing elements.</td></tr>
+<tr><td class="mono">sa_core.v</td><td>The grid plus the staggering logic and a "result valid" signal.</td></tr>
+<tr><td class="mono">sram_sdp.v</td><td>A simple memory (one write and one read per cycle), used for weights, pictures, biases and sums.</td></tr>
+<tr><td class="mono">lrb.v</td><td>Local reuse buffer: keeps recently used pictures close so the big memory is read less.</td></tr>
+<tr><td class="mono">perf_counters.v</td><td>Counters for cycles, useful multiply-adds and memory reads (what report.py prints).</td></tr>
+<tr><td class="mono">rst_sync.v</td><td>Turns the outside reset button into a clean internal reset.</td></tr>
+<tr><td class="mono">dnn_ppu.v</td><td>After the sums: add bias, multiply-and-shift, clamp to 8 bits, ReLU.</td></tr>
+<tr><td class="mono">dnn_ctrl.v</td><td>The sequencer: steps through layers, tiles and pictures (states FETCH, LDW, COMP, DRAIN).</td></tr>
+<tr><td class="mono">dnn_accel_core.v</td><td>Wires the memories, array, reuse buffer, post-processing unit and controller together.</td></tr>
+<tr><td class="mono">dnn_reg_if.v</td><td>The register file the outside world sees: ID, control, status, and windows into the memories.</td></tr>
+<tr><td class="mono">dnn_accel_top.v</td><td><b>The top level for Genus and the normal simulation.</b> Simple register bus.</td></tr>
+<tr><td class="mono">axil_reg_bridge.v, dnn_accel_axil_top.v</td><td>Optional wrapper that speaks AXI4-Lite, the bus used inside real chips.</td></tr>
+<tr><td class="mono">accel_ctrl.v, systolic_accel_top.v</td><td><span class="pill skip">ignore</span> The older matrix-multiply-only version (v1). Not part of the DNN design.</td></tr>
+</tbody></table></div>
+
+<h3>tb/</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">tb_dnn_player.v</td><td><span class="pill need">use</span> The testbench: replays <code>prog.hex</code> into the chip, checks the answers, writes <code>rtl_readback.txt</code>.</td></tr>
+<tr><td class="mono">tb_pe.v, tb_systolic_accel.v, trace_2x2.v</td><td><span class="pill skip">ignore</span> Testbenches of the older matrix-multiply version.</td></tr>
+</tbody></table></div>
+
+<h3>sw/ (Python)</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">train_mlp.py</td><td><span class="pill skip">done</span> Trains the network (needs PyTorch).</td></tr>
+<tr><td class="mono">quantize.py</td><td><span class="pill need">Job 3</span> Decimals to whole numbers.</td></tr>
+<tr><td class="mono">compile.py, compiler_lib.py</td><td><span class="pill need">Job 3</span> Whole numbers to <code>prog.hex</code>.</td></tr>
+<tr><td class="mono">golden.py, dnn_cfg.py</td><td>The answer key and the shared hardware sizes. Used by the others.</td></tr>
+<tr><td class="mono">report.py, trace_one.py</td><td><span class="pill need">Job 3</span> The report; follow one picture.</td></tr>
+<tr><td class="mono">example_tiny_net.py, show_tiny.py</td><td><span class="pill need">Job 3</span> The pencil example and its decoder.</td></tr>
+<tr><td class="mono">gen_random_net.py, sweep_arch.py</td><td><span class="pill skip">ignore</span> Stress tests and array-size sweep (they need Verilator).</td></tr>
+</tbody></table></div>
+
+<h3>driver/ (C)</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">dnn_accel.c, dnn_accel.h</td><td>The driver: load network, write picture, run, read result.</td></tr>
+<tr><td class="mono">hal_mmio.h</td><td>How the driver would touch registers on a real system.</td></tr>
+<tr><td class="mono">example_infer.c</td><td>A demo that uses a recording stand-in instead of hardware.</td></tr>
+</tbody></table></div>
+<p>All four are <span class="pill skip">ignore</span>: you never compile or run them for the project.</p>
+
+<h3>scripts/ (bash + Verilator, Linux only)</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">run_all.sh, run_dnn_regress.sh, run_regress.sh</td><td>My one-command flow and regressions.</td></tr>
+<tr><td class="mono">run_mutations.sh, check_driver.sh, check_psum_formula.sh, check_rtl_quality.sh</td><td>My checks: broken-design test, driver comparison, formula check, lint.</td></tr>
+<tr><td class="mono">run_tiny.sh, run_wave.sh</td><td>My versions of the pencil example and the waveform dump. Yours are in <code>cadence</code>.</td></tr>
+</tbody></table></div>
+<p>All are <span class="pill skip">ignore</span> for you.</p>
+
+<h3>build/ (generated)</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">prog.hex</td><td><span class="pill need">use</span> The chip's input program (9 677 lines).</td></tr>
+<tr><td class="mono">wave_prog.hex</td><td><span class="pill need">use</span> First batch only, for small waveform files.</td></tr>
+<tr><td class="mono">tiny_prog.hex</td><td><span class="pill need">use</span> The pencil example.</td></tr>
+<tr><td class="mono">rtl_readback.txt</td><td>The chip's answers after Job 1; read by <code>report.py</code>.</td></tr>
+<tr><td class="mono">prog_meta.json, prog_static.hex</td><td>Labels for the reads and the static part of the program.</td></tr>
+<tr><td class="mono">model.onnx, model.pt, data.npz, qnet.npz, net_image.h</td><td>The trained network in several forms, the test pictures, the integer network, the C version.</td></tr>
+<tr><td class="mono">c_prog.hex, c_trace.hex, c_rtl_readback.txt, py_trace_first.hex, axil_readback.txt, tiny_readback.txt</td><td><span class="pill skip">ignore</span> Leftovers from my own tests.</td></tr>
+</tbody></table></div>
+
+<h3>docs/ (Markdown, readable in Notepad)</h3>
+<div class="tablewrap"><table>
+<tbody>
+<tr><td class="mono">BEGINNER_GUIDE.html</td><td><span class="pill need">this guide</span> Open it in any browser.</td></tr>
+<tr><td class="mono">RTL_EXPLAINED.html</td><td><span class="pill need">read</span> What each of the 15 RTL files does, with diagrams and real waveforms, plus what both testbenches do and what their output should look like.</td></tr>
+<tr><td class="mono">00_START_HERE.md</td><td>What is finished, how efficient it is, what to do next.</td></tr>
+<tr><td class="mono">01_DNN_for_hardware_engineers.md</td><td>Neural-network theory in hardware terms, with the network's numbers.</td></tr>
+<tr><td class="mono">02_project_mapping.md</td><td>How your original report's design maps onto this one.</td></tr>
+<tr><td class="mono">03_software_stack.md</td><td>The Python flow in detail.</td></tr>
+<tr><td class="mono">04_roadmap.md</td><td>Where the project can go next (good source for "future work").</td></tr>
+<tr><td class="mono">05_register_map_and_driver.md</td><td>Every register address and the driver's functions.</td></tr>
+<tr><td class="mono">06_verification_and_backend.md</td><td>What was tested and how; synthesis facts and checklist.</td></tr>
+<tr><td class="mono">DESIGN_NOTES.md</td><td>Notes on the original matrix-multiply core (v1).</td></tr>
+</tbody></table></div>
+
+</main>
+</div>
+
+<script>
+(function () {
+  try {
+    if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
+      var toc = document.getElementById('tocd');
+      if (toc) toc.removeAttribute('open');
+    }
+  } catch (e) { /* leave the contents open */ }
+  var buttons = document.querySelectorAll('.cmd button[data-copy]');
+  function flash(btn, text) {
+    var old = btn.getAttribute('data-label') || btn.textContent;
+    btn.setAttribute('data-label', old);
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = old; }, 1600);
+  }
+  function selectText(pre) {
+    try {
+      var range = document.createRange();
+      range.selectNodeContents(pre);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch (e) { /* nothing more to do */ }
+  }
+  Array.prototype.forEach.call(buttons, function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = btn.closest('.cmd').querySelector('pre');
+      var text = pre.innerText.replace(/\s+$/, '');
+      var done = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(
+            function () { flash(btn, 'Copied'); },
+            function () { selectText(pre); flash(btn, 'Selected: press Ctrl+C'); }
+          );
+          done = true;
+        }
+      } catch (e) { done = false; }
+      if (!done) { selectText(pre); flash(btn, 'Selected: press Ctrl+C'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

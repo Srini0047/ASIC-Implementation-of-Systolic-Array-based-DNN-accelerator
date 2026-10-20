@@ -1,0 +1,7 @@
+# Python packages for the software flow (sw/). Versions listed are the ones this project was tested with.
+# torch >= 2.5 is needed because sw/train_mlp.py calls torch.onnx.export(..., dynamo=False).
+torch>=2.5          # tested 2.14
+onnx>=1.14          # tested 1.23
+onnxruntime>=1.15   # tested 1.25
+numpy>=1.24         # tested 2.4
+scikit-learn>=1.2   # tested 1.8 (only for the bundled 'digits' data set)
